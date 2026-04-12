@@ -7,7 +7,6 @@ import streamlit as st
 import json
 import sys
 import os
-import time
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
@@ -19,35 +18,33 @@ if "ANTHROPIC_API_KEY" in st.secrets:
 
 st.set_page_config(page_title="Regulatory Monitor | PWE Compliance AI", page_icon="📡", layout="wide")
 
-st.markdown("""
-<style>
-    .severity-critical { background: #fee2e2; color: #991b1b; padding: 4px 12px; border-radius: 12px; font-weight: 600; }
-    .severity-high { background: #fef3c7; color: #92400e; padding: 4px 12px; border-radius: 12px; font-weight: 600; }
-    .severity-medium { background: #dbeafe; color: #1e40af; padding: 4px 12px; border-radius: 12px; font-weight: 600; }
-    .severity-low { background: #d1fae5; color: #065f46; padding: 4px 12px; border-radius: 12px; font-weight: 600; }
-    .step-active { color: #2563eb; font-weight: bold; }
-    .step-done { color: #059669; }
-    .step-pending { color: #9ca3af; }
-</style>
-""", unsafe_allow_html=True)
+from core.styles import (inject_styles, render_page_header, render_kpi_row,
+                          render_section, render_pipeline, render_empty_state,
+                          severity_badge, source_badge)
 
-st.title("📡 Regulatory Change Monitor")
-st.markdown("**Agentic AI** — Multi-step pipeline that fetches, classifies, extracts obligations, and generates alerts.")
+inject_styles()
+
+render_page_header(
+    title="Regulatory Change Monitor",
+    description="Multi-step agentic pipeline that fetches, classifies, extracts obligations, maps to departments, and generates prioritized alerts",
+    ai_type="agentic"
+)
+
+# --- Pipeline Visualization ---
+render_pipeline(["Fetch Sources", "Classify Changes", "Extract Obligations", "Map to Depts", "Generate Alerts"])
 
 # --- Controls ---
-col1, col2, col3 = st.columns([2, 2, 1])
+st.markdown("")
+col1, col2, col3 = st.columns([2, 4, 2])
 with col1:
     source_filter = st.selectbox(
-        "Regulatory Source",
-        ["all", "CPUC", "FERC", "NERC", "CARB", "EPA"],
-        help="Filter to a specific regulatory body or monitor all sources"
+        "Filter by Regulator",
+        ["all", "CPUC", "FERC", "NERC", "CARB", "EPA", "PHMSA", "Cal-OSHA"],
+        help="Monitor a specific regulatory body or all sources"
     )
-with col2:
-    st.markdown("")
-    st.markdown("")
-    st.markdown(f"**Pipeline**: Fetch → Classify → Extract → Map → Alert")
 with col3:
-    run_button = st.button("🚀 Run Monitor Agent", type="primary", use_container_width=True)
+    st.markdown("")
+    run_button = st.button("Run Monitor Agent", type="primary", use_container_width=True)
 
 st.markdown("---")
 
@@ -55,104 +52,81 @@ if run_button:
     api_key = os.getenv("OPENAI_API_KEY", "")
     if not api_key:
         st.error("OPENAI_API_KEY not set. Please configure it in Streamlit Cloud Secrets (Settings > Secrets).")
-        st.code('OPENAI_API_KEY = "sk-proj-..."')
         st.stop()
-
-    # --- Progress Tracking ---
-    progress_container = st.container()
-    with progress_container:
-        steps = ["Fetching regulatory updates", "Classifying changes with AI", "Extracting obligations", "Mapping to PWE departments", "Generating alerts"]
-        progress_bar = st.progress(0)
-        status_text = st.empty()
 
     try:
         from agents.regulatory_monitor.graph import run_regulatory_monitor
 
-        # Show step-by-step progress
-        for i, step in enumerate(steps):
-            status_text.markdown(f"**Step {i+1}/5**: {step}...")
-            progress_bar.progress((i + 1) / 5)
-            if i == 0:
-                # Actually run the full pipeline
-                result = run_regulatory_monitor(source_filter=source_filter)
+        with st.status("Running 5-step agentic pipeline...", expanded=True) as status_ui:
+            st.write("Step 1/5: Fetching regulatory updates...")
+            st.write("Step 2/5: Classifying changes with AI...")
+            st.write("Step 3/5: Extracting obligations...")
+            st.write("Step 4/5: Mapping to PWE departments...")
+            st.write("Step 5/5: Generating prioritized alerts...")
+            result = run_regulatory_monitor(source_filter=source_filter)
+            status_ui.update(label="Pipeline complete!", state="complete", expanded=False)
 
-        progress_bar.progress(1.0)
-        status_text.markdown("**Pipeline complete!**")
-
-        # --- Display Results ---
         alerts = result.get("alerts", [])
         obligations = result.get("extracted_obligations", [])
         mappings = result.get("impact_mappings", [])
 
-        # Summary metrics
-        st.subheader("Summary")
-        m1, m2, m3, m4 = st.columns(4)
-        with m1:
-            st.metric("Regulatory Updates", len(result.get("raw_updates", [])))
-        with m2:
-            st.metric("Obligations Extracted", len(obligations))
-        with m3:
-            critical = sum(1 for a in alerts if a.get("severity") == "critical")
-            st.metric("Critical Alerts", critical)
-        with m4:
-            depts = set()
-            for m in mappings:
-                depts.add(m.get("primary_department", ""))
-                depts.update(m.get("supporting_departments", []))
-            st.metric("Departments Affected", len(depts))
+        # Summary KPIs
+        critical = sum(1 for a in alerts if a.get("severity") == "critical")
+        high = sum(1 for a in alerts if a.get("severity") == "high")
+        depts = set()
+        for m in mappings:
+            depts.add(m.get("primary_department", ""))
+            depts.update(m.get("supporting_departments", []))
 
-        st.markdown("---")
+        render_kpi_row([
+            {"value": str(len(result.get("raw_updates", []))), "label": "Regulations Scanned"},
+            {"value": str(len(obligations)), "label": "Obligations Extracted"},
+            {"value": str(critical), "label": "Critical Alerts", "sublabel": f"+ {high} High Priority"},
+            {"value": str(len(depts)), "label": "Departments Affected"},
+        ])
 
         # --- Alert Cards ---
-        st.subheader("Regulatory Alerts")
+        render_section("Regulatory Alerts", "Sorted by severity — critical items require immediate attention")
+
         for alert in alerts:
             severity = alert.get("severity", "medium")
-            severity_class = f"severity-{severity}"
-
             with st.expander(
                 f"{'🔴' if severity == 'critical' else '🟡' if severity == 'high' else '🔵' if severity == 'medium' else '🟢'} "
                 f"[{alert.get('source', '')}] {alert.get('title', 'Unknown')}",
                 expanded=(severity in ["critical", "high"])
             ):
-                col_a, col_b, col_c = st.columns([1, 1, 1])
-                with col_a:
-                    st.markdown(f"**Severity**: <span class='{severity_class}'>{severity.upper()}</span>", unsafe_allow_html=True)
-                with col_b:
-                    st.markdown(f"**Type**: {alert.get('change_type', 'N/A')}")
-                with col_c:
-                    st.markdown(f"**Obligations**: {alert.get('obligation_count', 0)}")
+                c1, c2, c3, c4 = st.columns(4)
+                with c1:
+                    st.markdown(f"**Severity**: {severity_badge(severity)}", unsafe_allow_html=True)
+                with c2:
+                    st.markdown(f"**Source**: {source_badge(alert.get('source', 'N/A'))}", unsafe_allow_html=True)
+                with c3:
+                    st.markdown(f"**Type**: `{alert.get('change_type', 'N/A')}`")
+                with c4:
+                    st.markdown(f"**Obligations**: `{alert.get('obligation_count', 0)}`")
 
-                st.markdown(f"**Summary**: {alert.get('summary', 'N/A')}")
+                st.markdown(f"> {alert.get('summary', 'N/A')}")
 
                 deadlines = alert.get("key_deadlines", [])
                 if deadlines:
-                    st.markdown(f"**Key Deadlines**: {', '.join(deadlines)}")
+                    st.warning(f"**Key Deadlines**: {', '.join(deadlines)}")
 
                 if alert.get("penalty_info"):
-                    st.warning(f"**Penalty Risk**: {alert['penalty_info']}")
+                    st.error(f"**Penalty Risk**: {alert['penalty_info']}")
 
                 if alert.get("affected_departments"):
-                    st.markdown(f"**Affected Departments**: {', '.join(alert['affected_departments'])}")
+                    st.info(f"**Affected Departments**: {', '.join(alert['affected_departments'])}")
 
-                # Obligations detail
+                # Obligations table
                 obs = alert.get("obligations", [])
                 if obs:
-                    st.markdown("**Extracted Obligations:**")
+                    render_section("Extracted Obligations")
+                    table_html = '<table class="data-table"><tr><th>ID</th><th>Description</th><th>Deadline</th><th>Category</th></tr>'
                     for ob in obs:
-                        st.markdown(f"- `{ob.get('obligation_id', 'N/A')}`: {ob.get('description', 'N/A')} "
-                                    f"(Deadline: {ob.get('deadline', 'TBD')})")
+                        table_html += f"<tr><td><code>{ob.get('obligation_id', 'N/A')}</code></td><td>{ob.get('description', 'N/A')[:120]}</td><td>{ob.get('deadline', 'TBD')}</td><td>{ob.get('category', 'N/A')}</td></tr>"
+                    table_html += "</table>"
+                    st.markdown(table_html, unsafe_allow_html=True)
 
-                # Impact mappings
-                alert_mappings = alert.get("impact_mappings", [])
-                if alert_mappings:
-                    st.markdown("**Department Impact Mapping:**")
-                    for m in alert_mappings:
-                        st.markdown(f"- **{m.get('primary_department', 'N/A')}**: "
-                                    f"{m.get('operational_impact', 'N/A')} "
-                                    f"(Effort: {m.get('estimated_effort', 'N/A')}, "
-                                    f"Timeline: {m.get('timeline_risk', 'N/A')})")
-
-        # --- Raw Data ---
         with st.expander("View Raw Agent Output (JSON)"):
             st.json(result)
 
@@ -161,27 +135,26 @@ if run_button:
         st.exception(e)
 
 else:
-    # --- Demo / Preview Mode ---
-    st.info("Click **Run Monitor Agent** to execute the 5-step agentic pipeline against live regulatory data.")
+    # --- Preview Mode ---
+    render_section("Monitored Regulatory Sources", "12 active regulations across 7 regulatory bodies — click Run Monitor Agent to analyze")
 
-    st.subheader("Monitored Sources")
     from agents.regulatory_monitor.tools import SAMPLE_REGULATORY_UPDATES
 
-    for update in SAMPLE_REGULATORY_UPDATES:
-        with st.expander(f"[{update['source']}] {update['title']} — {update['published_date']}"):
-            st.markdown(update['text'][:500] + "...")
-            st.caption(f"Source: {update['url']}")
+    # Group by source
+    sources = {}
+    for u in SAMPLE_REGULATORY_UPDATES:
+        sources.setdefault(u["source"], []).append(u)
 
-    st.markdown("---")
-    st.subheader("Agent Pipeline Architecture")
-    st.markdown("""
-    ```
-    ┌──────────┐    ┌──────────┐    ┌───────────┐    ┌──────────┐    ┌──────────┐
-    │  FETCH   │───▶│ CLASSIFY │───▶│  EXTRACT  │───▶│   MAP    │───▶│  ALERT   │
-    │ Sources  │    │ (GPT-4o) │    │ Obligations│    │ to Depts │    │ Generate │
-    │          │    │          │    │ (GPT-4o)   │    │ (GPT-4o) │    │          │
-    └──────────┘    └──────────┘    └───────────┘    └──────────┘    └──────────┘
-         5               4              3→N             N→M            Sorted
-      sources        classifications   obligations    mappings       by severity
-    ```
-    """)
+    for source, updates in sources.items():
+        with st.expander(f"{source_badge(source)} — {len(updates)} regulation(s)", expanded=False):
+            for u in updates:
+                st.markdown(f"**{u['title']}**")
+                st.caption(f"Published: {u['published_date']}")
+                st.markdown(u['text'][:300] + "...")
+                st.markdown("---")
+
+    render_empty_state(
+        icon="📡",
+        title="Ready to Monitor",
+        description="Click 'Run Monitor Agent' to execute the 5-step agentic pipeline and generate regulatory alerts"
+    )
