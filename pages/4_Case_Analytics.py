@@ -13,6 +13,10 @@ import pandas as pd
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
+# Load API keys from Streamlit secrets
+if "ANTHROPIC_API_KEY" in st.secrets:
+    os.environ["ANTHROPIC_API_KEY"] = st.secrets["ANTHROPIC_API_KEY"]
+
 st.set_page_config(page_title="Case Analytics | PWE Compliance AI", page_icon="🔍", layout="wide")
 
 st.title("🔍 Case Analytics")

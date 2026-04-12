@@ -10,6 +10,14 @@ import sys
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+# Load API keys from Streamlit secrets (Streamlit Cloud) or .env (local)
+if "ANTHROPIC_API_KEY" in st.secrets:
+    os.environ["ANTHROPIC_API_KEY"] = st.secrets["ANTHROPIC_API_KEY"]
+if "VOYAGE_API_KEY" in st.secrets:
+    os.environ["VOYAGE_API_KEY"] = st.secrets["VOYAGE_API_KEY"]
+if "OPENAI_API_KEY" in st.secrets:
+    os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
+
 st.set_page_config(
     page_title="PWE Compliance AI",
     page_icon="⚡",
