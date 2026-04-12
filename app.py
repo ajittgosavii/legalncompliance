@@ -77,7 +77,7 @@ st.markdown("""
         Agentic AI & Gen AI for Regulatory Change Monitoring, Obligation Analysis, Audit Preparation & Case Analytics
     </p>
     <p style="margin: 0.3rem 0 0 0; font-size: 0.85rem; opacity: 0.7;">
-        Powered by Claude Sonnet 4.6 | LangGraph Agentic Framework | RAG-Enhanced Analytics
+        Powered by OpenAI GPT-4o | LangGraph Agentic Framework | RAG-Enhanced Analytics | Claude Fallback
     </p>
 </div>
 """, unsafe_allow_html=True)
@@ -140,7 +140,7 @@ with col_a:
             Multi-step agent pipeline: Fetch → Classify → Extract Obligations → Map to Departments → Alert.
         </p>
         <p style="font-size:0.8rem; color:#999;">
-            Agent: 5-node LangGraph state machine | LLM: Claude Sonnet 4.6
+            Agent: 5-node LangGraph state machine | LLM: GPT-4o
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -156,7 +156,7 @@ with col_a:
             and Response Drafter agents. Produces audit-ready packages.
         </p>
         <p style="font-size:0.8rem; color:#999;">
-            Agent: Supervisor + 3 Sub-Agents | LLM: Claude Sonnet 4.6
+            Agent: Supervisor + 3 Sub-Agents | LLM: GPT-4o
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -173,7 +173,7 @@ with col_b:
             scores impact across cost/effort/risk/timeline dimensions with executive reporting.
         </p>
         <p style="font-size:0.8rem; color:#999;">
-            Agent: 4-node graph with Opus for scoring | LLM: Claude Opus 4.6
+            Agent: 4-node graph with deep scoring | LLM: GPT-4o
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -189,7 +189,7 @@ with col_b:
             Precedent search, trend analysis, penalty prediction, and risk assessment.
         </p>
         <p style="font-size:0.8rem; color:#999;">
-            Chain: RAG + Claude Sonnet 4.6 | Vector DB: ChromaDB
+            Chain: RAG + GPT-4o | Vector: In-Memory TF-IDF
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -215,8 +215,8 @@ st.markdown("""
 └─────────┼────────────────┼─────────────────┼─────────────────┼──────────┘
           │                │                 │                 │
 ┌─────────▼────────────────▼─────────────────▼─────────────────▼──────────┐
-│  Claude Sonnet 4.6  │  Claude Opus 4.6  │  ChromaDB  │  SQLite/PgSQL  │
-│  (Primary LLM)      │  (Heavy Analysis) │  (Vectors) │  (Structured)  │
+│  OpenAI GPT-4o      │  Claude Sonnet    │  TF-IDF    │  SQLite/PgSQL  │
+│  (Primary LLM)      │  (Fallback)       │  (Vectors) │  (Structured)  │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 """)
@@ -228,8 +228,8 @@ col_t1, col_t2, col_t3 = st.columns(3)
 with col_t1:
     st.markdown("""
     **AI / LLM Layer**
-    - Claude Sonnet 4.6 (primary)
-    - Claude Opus 4.6 (complex analysis)
+    - OpenAI GPT-4o (primary)
+    - Claude Sonnet 4.6 (fallback)
     - LangGraph (agentic orchestration)
     - Voyage Law-2 (legal embeddings)
     """)

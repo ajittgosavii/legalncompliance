@@ -9,7 +9,7 @@ from typing import TypedDict, Annotated
 from langgraph.graph import StateGraph, END
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from core.llm import get_claude_sonnet
+from core.llm import get_openai_primary
 from core.prompts import REGULATORY_MONITOR_PROMPT
 from agents.regulatory_monitor.tools import (
     SAMPLE_REGULATORY_UPDATES,
@@ -45,7 +45,7 @@ def fetch_updates(state: MonitorState) -> MonitorState:
 
 def classify_changes(state: MonitorState) -> MonitorState:
     """Node 2: Classify each update by type and severity using Claude."""
-    llm = get_claude_sonnet()
+    llm = get_openai_primary()
     classified = []
 
     for update in state["raw_updates"]:
@@ -101,7 +101,7 @@ Respond in JSON format:
 
 def extract_obligations(state: MonitorState) -> MonitorState:
     """Node 3: Extract specific obligations from classified changes."""
-    llm = get_claude_sonnet()
+    llm = get_openai_primary()
     all_obligations = []
 
     for update in state["classified_updates"]:
@@ -164,7 +164,7 @@ For each obligation, provide JSON array:
 
 def map_to_departments(state: MonitorState) -> MonitorState:
     """Node 4: Map obligations to PWE departments and assess impact."""
-    llm = get_claude_sonnet()
+    llm = get_openai_primary()
 
     obligations_text = json.dumps(state["extracted_obligations"], indent=2)
 

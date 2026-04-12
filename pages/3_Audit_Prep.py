@@ -11,6 +11,8 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 # Load API keys from Streamlit secrets
+if "OPENAI_API_KEY" in st.secrets:
+    os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
 if "ANTHROPIC_API_KEY" in st.secrets:
     os.environ["ANTHROPIC_API_KEY"] = st.secrets["ANTHROPIC_API_KEY"]
 
@@ -121,9 +123,9 @@ with col_run:
 st.markdown("---")
 
 if run_audit:
-    api_key = os.getenv("ANTHROPIC_API_KEY", "")
+    api_key = os.getenv("OPENAI_API_KEY", "")
     if not api_key:
-        st.error("ANTHROPIC_API_KEY not set.")
+        st.error("OPENAI_API_KEY not set. Please configure in Streamlit Cloud Secrets.")
         st.stop()
 
     from agents.audit_prep.graph import run_audit_preparation

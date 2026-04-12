@@ -12,6 +12,8 @@ import time
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 # Load API keys from Streamlit secrets
+if "OPENAI_API_KEY" in st.secrets:
+    os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
 if "ANTHROPIC_API_KEY" in st.secrets:
     os.environ["ANTHROPIC_API_KEY"] = st.secrets["ANTHROPIC_API_KEY"]
 
@@ -50,10 +52,10 @@ with col3:
 st.markdown("---")
 
 if run_button:
-    api_key = os.getenv("ANTHROPIC_API_KEY", "")
+    api_key = os.getenv("OPENAI_API_KEY", "")
     if not api_key:
-        st.error("ANTHROPIC_API_KEY not set. Please configure it in your .env file or environment variables.")
-        st.code("export ANTHROPIC_API_KEY='your-key-here'")
+        st.error("OPENAI_API_KEY not set. Please configure it in Streamlit Cloud Secrets (Settings > Secrets).")
+        st.code('OPENAI_API_KEY = "sk-proj-..."')
         st.stop()
 
     # --- Progress Tracking ---
@@ -176,8 +178,8 @@ else:
     ```
     ┌──────────┐    ┌──────────┐    ┌───────────┐    ┌──────────┐    ┌──────────┐
     │  FETCH   │───▶│ CLASSIFY │───▶│  EXTRACT  │───▶│   MAP    │───▶│  ALERT   │
-    │ Sources  │    │ (Claude) │    │ Obligations│    │ to Depts │    │ Generate │
-    │          │    │          │    │ (Claude)   │    │ (Claude) │    │          │
+    │ Sources  │    │ (GPT-4o) │    │ Obligations│    │ to Depts │    │ Generate │
+    │          │    │          │    │ (GPT-4o)   │    │ (GPT-4o) │    │          │
     └──────────┘    └──────────┘    └───────────┘    └──────────┘    └──────────┘
          5               4              3→N             N→M            Sorted
       sources        classifications   obligations    mappings       by severity

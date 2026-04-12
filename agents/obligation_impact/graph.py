@@ -8,7 +8,7 @@ from typing import TypedDict
 from langgraph.graph import StateGraph, END
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from core.llm import get_claude_sonnet, get_claude_opus
+from core.llm import get_openai_primary
 from core.prompts import OBLIGATION_IMPACT_PROMPT
 
 
@@ -24,7 +24,7 @@ class ImpactState(TypedDict):
 
 def decompose_obligations(state: ImpactState) -> ImpactState:
     """Decompose complex regulation into atomic, testable obligations."""
-    llm = get_claude_sonnet()
+    llm = get_openai_primary()
 
     prompt = f"""Decompose this regulation into atomic compliance obligations.
 Each obligation should be independently testable and assignable.
@@ -63,7 +63,7 @@ Return a JSON array:
 
 def cross_reference(state: ImpactState) -> ImpactState:
     """Check for conflicts/overlaps with existing PWE obligations."""
-    llm = get_claude_sonnet()
+    llm = get_openai_primary()
 
     prompt = f"""Analyze these new obligations for potential conflicts or overlaps with
 existing PWE regulatory requirements.
@@ -110,7 +110,7 @@ For each new obligation, identify:
 
 def score_impacts(state: ImpactState) -> ImpactState:
     """Score each obligation on cost, effort, risk, and timeline dimensions."""
-    llm = get_claude_opus()  # Use Opus for nuanced scoring
+    llm = get_openai_primary()  # GPT-4o for cost-effective scoring
 
     prompt = f"""Score the impact of each obligation on PWE operations.
 Consider PWE's current financial position, workforce, and regulatory history.
@@ -178,7 +178,7 @@ Score each obligation:
 
 def generate_impact_report(state: ImpactState) -> ImpactState:
     """Generate executive impact report."""
-    llm = get_claude_sonnet()
+    llm = get_openai_primary()
 
     prompt = f"""Generate an executive impact assessment report for PWE leadership.
 

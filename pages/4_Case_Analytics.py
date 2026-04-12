@@ -14,6 +14,8 @@ import pandas as pd
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 # Load API keys from Streamlit secrets
+if "OPENAI_API_KEY" in st.secrets:
+    os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
 if "ANTHROPIC_API_KEY" in st.secrets:
     os.environ["ANTHROPIC_API_KEY"] = st.secrets["ANTHROPIC_API_KEY"]
 
@@ -165,9 +167,9 @@ with qc4:
         analysis_type = "precedent"
 
 if query:
-    api_key = os.getenv("ANTHROPIC_API_KEY", "")
+    api_key = os.getenv("OPENAI_API_KEY", "")
     if not api_key:
-        st.error("ANTHROPIC_API_KEY not set.")
+        st.error("OPENAI_API_KEY not set. Please configure in Streamlit Cloud Secrets.")
         st.stop()
 
     with st.spinner(f"Running {analysis_type} analysis..."):

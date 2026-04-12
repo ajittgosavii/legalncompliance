@@ -1,64 +1,81 @@
 """
 PWE Compliance AI - LLM Client Configuration
-Provides Claude (primary) and Ollama (local) LLM clients.
+Primary: OpenAI GPT-4o (cost-effective for demo)
+Fallback: Claude Sonnet 4.6 (higher accuracy for regulatory text)
 """
 
 import os
-from anthropic import Anthropic
-from langchain_anthropic import ChatAnthropic
 
 
-def get_anthropic_client() -> Anthropic:
-    """Raw Anthropic client for direct API calls."""
-    return Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-
-
-def get_claude_sonnet() -> ChatAnthropic:
-    """Claude Sonnet 4.6 — primary LLM for analysis and generation."""
-    return ChatAnthropic(
-        model="claude-sonnet-4-6-20250514",
-        anthropic_api_key=os.getenv("ANTHROPIC_API_KEY"),
+def get_openai_primary():
+    """GPT-4o — primary LLM for demo (cost-effective)."""
+    from langchain_openai import ChatOpenAI
+    return ChatOpenAI(
+        model="gpt-4o",
+        openai_api_key=os.getenv("OPENAI_API_KEY"),
         temperature=0,
         max_tokens=4096,
     )
 
 
-def get_claude_opus() -> ChatAnthropic:
-    """Claude Opus 4.6 — heavy reasoning for complex regulatory analysis."""
-    return ChatAnthropic(
-        model="claude-opus-4-6-20250610",
-        anthropic_api_key=os.getenv("ANTHROPIC_API_KEY"),
+def get_openai_mini():
+    """GPT-4o-mini — lightweight tasks (classification, summaries)."""
+    from langchain_openai import ChatOpenAI
+    return ChatOpenAI(
+        model="gpt-4o-mini",
+        openai_api_key=os.getenv("OPENAI_API_KEY"),
         temperature=0,
-        max_tokens=8192,
+        max_tokens=4096,
     )
 
 
-def get_local_llm():
-    """Llama 3.1 8B via Ollama — classification, summarization, redaction.
-    Returns None if Ollama is not available (e.g., on Streamlit Cloud).
-    """
+def get_claude_sonnet():
+    """Claude Sonnet 4.6 — fallback for high-accuracy regulatory analysis."""
     try:
-        from langchain_community.llms import Ollama
-        ollama_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-        llm = Ollama(
-            model="llama3.1:8b",
-            base_url=ollama_url,
+        from langchain_anthropic import ChatAnthropic
+        return ChatAnthropic(
+            model="claude-sonnet-4-6-20250514",
+            anthropic_api_key=os.getenv("ANTHROPIC_API_KEY"),
             temperature=0,
+            max_tokens=4096,
         )
-        llm.invoke("ping")
-        return llm
     except Exception:
-        return None
+        # If Anthropic not available, fall back to OpenAI
+        return get_openai_primary()
 
 
-def get_llm(tier: str = "sonnet") -> ChatAnthropic:
-    """Get LLM by tier: 'opus', 'sonnet', or 'local'."""
+def get_claude_opus():
+    """Claude Opus 4.6 — heavy reasoning. Falls back to GPT-4o for demo."""
+    try:
+        from langchain_anthropic import ChatAnthropic
+        key = os.getenv("ANTHROPIC_API_KEY")
+        if key:
+            return ChatAnthropic(
+                model="claude-opus-4-6-20250610",
+                anthropic_api_key=key,
+                temperature=0,
+                max_tokens=8192,
+            )
+    except Exception:
+        pass
+    # Fallback to GPT-4o
+    return get_openai_primary()
+
+
+def get_llm(tier: str = "primary"):
+    """Get LLM by tier.
+
+    Tiers:
+      'primary'  — GPT-4o (default, cost-effective)
+      'mini'     — GPT-4o-mini (lightweight tasks)
+      'advanced' — Claude Sonnet (high-accuracy fallback)
+      'opus'     — Claude Opus (complex reasoning, falls back to GPT-4o)
+    """
     if tier == "opus":
         return get_claude_opus()
-    elif tier == "local":
-        local = get_local_llm()
-        if local:
-            return local
+    elif tier == "advanced":
         return get_claude_sonnet()
+    elif tier == "mini":
+        return get_openai_mini()
     else:
-        return get_claude_sonnet()
+        return get_openai_primary()

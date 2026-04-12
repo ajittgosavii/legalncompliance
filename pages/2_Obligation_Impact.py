@@ -11,6 +11,8 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 # Load API keys from Streamlit secrets
+if "OPENAI_API_KEY" in st.secrets:
+    os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
 if "ANTHROPIC_API_KEY" in st.secrets:
     os.environ["ANTHROPIC_API_KEY"] = st.secrets["ANTHROPIC_API_KEY"]
 
@@ -43,9 +45,9 @@ with col2:
 st.markdown("---")
 
 if analyze_button:
-    api_key = os.getenv("ANTHROPIC_API_KEY", "")
+    api_key = os.getenv("OPENAI_API_KEY", "")
     if not api_key:
-        st.error("ANTHROPIC_API_KEY not set. Please configure in .env or environment.")
+        st.error("OPENAI_API_KEY not set. Please configure in Streamlit Cloud Secrets.")
         st.stop()
 
     from agents.obligation_impact.graph import run_obligation_impact
@@ -177,8 +179,8 @@ else:
     ┌────────────┐    ┌─────────────┐    ┌──────────────┐    ┌──────────────┐
     │ DECOMPOSE  │───▶│ CROSS-REF   │───▶│    SCORE     │───▶│   REPORT     │
     │ Atomic     │    │ vs Existing │    │ Multi-Dim    │    │  Executive   │
-    │ Obligations│    │ Obligations │    │ (Opus 4.6)   │    │  Summary     │
+    │ Obligations│    │ Obligations │    │ (GPT-4o)     │    │  Summary     │
     └────────────┘    └─────────────┘    └──────────────┘    └──────────────┘
-       Sonnet            Sonnet              Opus               Sonnet
+       GPT-4o           GPT-4o             GPT-4o             GPT-4o
     ```
     """)

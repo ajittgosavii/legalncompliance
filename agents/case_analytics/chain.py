@@ -6,7 +6,7 @@ Retrieval-heavy analysis of historical CPUC/FERC enforcement cases.
 import json
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from core.llm import get_claude_sonnet
+from core.llm import get_openai_primary
 from core.prompts import CASE_ANALYTICS_PROMPT
 from core.vectorstore import search_documents, add_documents, COLLECTION_CASES
 
@@ -499,7 +499,7 @@ def run_case_analytics(query: str, analysis_type: str = "precedent") -> dict:
 
     analysis_type: 'precedent' | 'trend' | 'risk' | 'summary'
     """
-    llm = get_claude_sonnet()
+    llm = get_openai_primary()
 
     # Search for relevant cases
     relevant_cases = search_cases(query, k=5)

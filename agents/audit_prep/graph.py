@@ -8,7 +8,7 @@ from typing import TypedDict, Literal
 from langgraph.graph import StateGraph, END
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from core.llm import get_claude_sonnet
+from core.llm import get_openai_primary
 from core.prompts import (
     AUDIT_SUPERVISOR_PROMPT,
     AUDIT_EVIDENCE_PROMPT,
@@ -101,7 +101,7 @@ SAMPLE_EVIDENCE = {
 
 def plan_audit(state: AuditState) -> AuditState:
     """Supervisor: Plan the audit preparation approach."""
-    llm = get_claude_sonnet()
+    llm = get_openai_primary()
 
     prompt = f"""As the Audit Preparation Supervisor, plan the audit preparation approach.
 
@@ -130,7 +130,7 @@ Create an audit preparation plan as JSON:
 
 def collect_evidence(state: AuditState) -> AuditState:
     """Evidence Collector: Gather and validate evidence for each obligation."""
-    llm = get_claude_sonnet()
+    llm = get_openai_primary()
 
     # Combine all available evidence
     all_evidence = []
@@ -182,7 +182,7 @@ For each obligation, assess evidence coverage:
 
 def analyze_gaps(state: AuditState) -> AuditState:
     """Gap Analyzer: Identify and prioritize compliance gaps."""
-    llm = get_claude_sonnet()
+    llm = get_openai_primary()
 
     prompt = f"""As the Gap Analyzer, identify compliance gaps based on evidence assessment.
 
@@ -227,7 +227,7 @@ For each gap found:
 
 def draft_responses(state: AuditState) -> AuditState:
     """Response Drafter: Prepare professional audit responses."""
-    llm = get_claude_sonnet()
+    llm = get_openai_primary()
 
     prompt = f"""As the Response Drafter, prepare professional audit responses.
 
@@ -271,7 +271,7 @@ Draft responses for each audit area:
 
 def supervisor_review(state: AuditState) -> AuditState:
     """Supervisor: Review completeness and quality of audit package."""
-    llm = get_claude_sonnet()
+    llm = get_openai_primary()
 
     prompt = f"""As the Audit Supervisor, review the complete audit preparation package.
 
