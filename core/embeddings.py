@@ -1,16 +1,20 @@
 """
 PWE Compliance AI - Embedding Models
-Voyage Law-2 for legal/regulatory text, with OpenAI fallback.
+Lightweight implementation for Streamlit Cloud compatibility.
+Uses in-memory TF-IDF vectorstore (no external embedding APIs needed for prototype).
 """
 
-import os
-from langchain_core.embeddings import Embeddings
+# Note: The vectorstore module uses built-in TF-IDF similarity search,
+# so no external embedding model is needed for the prototype.
+# When deploying to production with ChromaDB, uncomment the appropriate
+# embedding provider below.
 
-
-def get_embeddings() -> Embeddings:
-    """Get the best available embedding model.
-    Priority: Voyage Law-2 > OpenAI text-embedding-3-small
+def get_embeddings():
+    """Get embedding model. Returns None for in-memory TF-IDF mode.
+    For production, configure one of the providers below.
     """
+    import os
+
     voyage_key = os.getenv("VOYAGE_API_KEY")
     if voyage_key:
         try:
@@ -33,8 +37,5 @@ def get_embeddings() -> Embeddings:
         except ImportError:
             pass
 
-    # Fallback: HuggingFace local embeddings (free, no API key)
-    from langchain_community.embeddings import HuggingFaceEmbeddings
-    return HuggingFaceEmbeddings(
-        model_name="sentence-transformers/all-MiniLM-L6-v2"
-    )
+    # Prototype mode: vectorstore uses built-in TF-IDF, no embeddings needed
+    return None

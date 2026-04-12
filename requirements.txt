@@ -11,14 +11,14 @@ langchain-core>=0.3.0
 langchain-community>=0.3.0
 langgraph>=0.2.0
 
-# Vector Store
-chromadb>=0.5.0
-langchain-chroma>=0.2.0
+# Vector Store — using built-in in-memory TF-IDF for Streamlit Cloud compatibility
+# chromadb>=0.5.0              # Uncomment for local/production (requires compatible protobuf)
+# langchain-chroma>=0.2.0     # Uncomment for local/production
 
-# Embeddings (choose based on your API keys)
-# langchain-voyageai>=0.3.0      # Uncomment if using Voyage Law-2
-# langchain-openai>=0.2.0        # Uncomment if using OpenAI embeddings
-sentence-transformers>=3.0.0     # Free local fallback embeddings
+# Embeddings — using built-in tokenizer for Streamlit Cloud compatibility
+# sentence-transformers>=3.0.0  # Uncomment for local (heavy dependency)
+# langchain-voyageai>=0.3.0    # Uncomment if using Voyage Law-2
+# langchain-openai>=0.2.0      # Uncomment if using OpenAI embeddings
 
 # Data & Visualization
 plotly>=5.24.0

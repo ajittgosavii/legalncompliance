@@ -6,8 +6,6 @@ Provides Claude (primary) and Ollama (local) LLM clients.
 import os
 from anthropic import Anthropic
 from langchain_anthropic import ChatAnthropic
-from langchain_community.llms import Ollama
-from langchain_core.language_models import BaseChatModel
 
 
 def get_anthropic_client() -> Anthropic:
@@ -35,25 +33,25 @@ def get_claude_opus() -> ChatAnthropic:
     )
 
 
-def get_local_llm() -> BaseChatModel | None:
+def get_local_llm():
     """Llama 3.1 8B via Ollama — classification, summarization, redaction.
     Returns None if Ollama is not available (e.g., on Streamlit Cloud).
     """
-    ollama_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
     try:
+        from langchain_community.llms import Ollama
+        ollama_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
         llm = Ollama(
             model="llama3.1:8b",
             base_url=ollama_url,
             temperature=0,
         )
-        # Quick health check
         llm.invoke("ping")
         return llm
     except Exception:
         return None
 
 
-def get_llm(tier: str = "sonnet") -> BaseChatModel:
+def get_llm(tier: str = "sonnet") -> ChatAnthropic:
     """Get LLM by tier: 'opus', 'sonnet', or 'local'."""
     if tier == "opus":
         return get_claude_opus()
@@ -61,7 +59,6 @@ def get_llm(tier: str = "sonnet") -> BaseChatModel:
         local = get_local_llm()
         if local:
             return local
-        # Fallback to Sonnet if local unavailable
         return get_claude_sonnet()
     else:
         return get_claude_sonnet()
