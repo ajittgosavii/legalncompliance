@@ -125,12 +125,165 @@ with col2:
     """, unsafe_allow_html=True)
     st.page_link("pages/4_Case_Analytics.py", label="Open Case Analytics →", icon="🔍")
 
-# --- Architecture ---
-render_section("Platform Architecture")
+# --- Recommended Start ---
+st.markdown("")
+rec1, rec2 = st.columns([1, 1])
+with rec1:
+    st.success("""
+    **Recommended: Start Here**
 
-st.markdown("""
-<div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 1.5rem; font-family: monospace; font-size: 0.8rem; line-height: 1.6; color: #334155;">
-<pre style="margin:0; white-space: pre;">
+    New to the platform? Begin with **Case Analytics** — it loads instantly with
+    interactive charts and 28 pre-loaded cases. No AI agent execution required.
+    """)
+    st.page_link("pages/4_Case_Analytics.py", label="Open Case Analytics →", icon="🔍")
+with rec2:
+    st.info("""
+    **Ready to Run AI Agents?**
+
+    Try the **Regulatory Monitor** — click one button to watch the 5-step agentic
+    pipeline classify 12 regulations, extract obligations, and generate prioritized alerts.
+    """)
+    st.page_link("pages/1_Regulatory_Monitor.py", label="Open Regulatory Monitor →", icon="📡")
+
+# --- Getting Started Guide ---
+render_section("Getting Started", "Follow these steps to begin using the platform")
+
+tab_start, tab_workflows, tab_arch = st.tabs(["Quick Start Guide", "Module Workflows", "Architecture & Tech Stack"])
+
+with tab_start:
+    st.markdown("""
+    ### Step 1: Explore the Case Analytics Dashboard (No AI needed)
+
+    The **Case Analytics** module loads instantly with **28 pre-loaded enforcement cases**
+    across 7 regulators. You can explore interactive charts, browse cases, and filter by
+    regulator, type, and penalty — all without running any AI agents.
+
+    **Try it now:** Click **Case Analytics** in the sidebar.
+
+    ---
+
+    ### Step 2: Run Your First AI Agent — Regulatory Monitor
+
+    This is the best place to start with AI-powered analysis:
+
+    1. Navigate to **Regulatory Monitor** in the sidebar
+    2. Select a regulator from the dropdown (or leave as "All")
+    3. Click **"Run Monitor Agent"**
+    4. Watch the 5-step agentic pipeline process 12 regulations in real time
+    5. Review the generated alerts sorted by severity — each includes extracted obligations,
+       affected departments, deadlines, and penalty risks
+
+    **What happens behind the scenes:** The AI agent reads each regulation, classifies the
+    change type and severity, extracts specific compliance obligations, maps them to your
+    departments, and generates prioritized alerts.
+
+    ---
+
+    ### Step 3: Deep-Dive with Obligation Impact Analysis
+
+    Once you've seen the regulatory alerts, pick any specific regulation for deep analysis:
+
+    1. Navigate to **Obligation Impact** in the sidebar
+    2. Select a regulation from the dropdown
+    3. Click **"Run Impact Analysis"**
+    4. Review the executive report with cost estimates, deadlines, and recommended actions
+    5. Explore each decomposed obligation with multi-dimensional impact scores
+
+    ---
+
+    ### Step 4: Prepare for an Audit
+
+    The most powerful module — a team of 4 AI agents working together:
+
+    1. Navigate to **Audit Preparation** in the sidebar
+    2. Choose an audit type (e.g., "CPUC Wildfire Safety Audit")
+    3. Select the regulations in scope
+    4. Click **"Run Audit Prep Agent"**
+    5. Review the Supervisor's readiness score, evidence inventory, gap analysis, and draft responses
+
+    ---
+
+    ### Step 5: Ask Questions in Case Analytics
+
+    Use natural language to query the enforcement case database:
+
+    1. Navigate to **Case Analytics** in the sidebar
+    2. Type a question like *"What are the precedents for wildfire penalties?"*
+    3. Select an analysis type (precedent, trend, risk, or summary)
+    4. Review AI-generated analysis with relevant cases, risk assessment, and recommendations
+    """)
+
+with tab_workflows:
+    st.markdown("### Module Workflow Details")
+    st.markdown("")
+
+    wf1, wf2 = st.columns(2)
+    with wf1:
+        st.markdown("""
+        #### 1. Regulatory Change Monitor
+        **Type:** Agentic AI (5-node pipeline)
+
+        | Step | Agent Action |
+        |------|-------------|
+        | Fetch | Scans 7 regulatory sources |
+        | Classify | AI determines change type & severity |
+        | Extract | Pulls specific obligations from text |
+        | Map | Assigns to PWE departments |
+        | Alert | Generates prioritized notifications |
+
+        **Best for:** Staying current with regulatory changes,
+        identifying new compliance obligations early.
+
+        ---
+
+        #### 3. Audit Analysis & Preparation
+        **Type:** Agentic AI (Supervisor + 3 Sub-Agents)
+
+        | Agent | Role |
+        |-------|------|
+        | Supervisor | Plans approach, reviews final package |
+        | Evidence Collector | Finds and validates documentation |
+        | Gap Analyzer | Identifies compliance gaps |
+        | Response Drafter | Writes audit-ready responses |
+
+        **Best for:** Preparing for regulatory audits,
+        identifying evidence gaps before auditors arrive.
+        """)
+
+    with wf2:
+        st.markdown("""
+        #### 2. Obligation Impact Analysis
+        **Type:** Agentic AI (4-node graph)
+
+        | Step | Agent Action |
+        |------|-------------|
+        | Decompose | Breaks regulation into atomic obligations |
+        | Cross-Ref | Checks conflicts with existing rules |
+        | Score | Rates cost, operations, timeline, penalty |
+        | Report | Generates executive summary |
+
+        **Best for:** Understanding the full impact of a new
+        regulation before planning compliance response.
+
+        ---
+
+        #### 4. Case Analytics
+        **Type:** Generative AI (RAG + Search)
+
+        | Feature | Description |
+        |---------|-------------|
+        | Dashboard | Interactive penalty charts & trends |
+        | AI Search | Natural language case queries |
+        | Browser | Filter & explore 28 cases |
+        | Analysis | Precedent, trend, risk, summary |
+
+        **Best for:** Understanding enforcement history,
+        finding precedents, assessing penalty exposure.
+        """)
+
+with tab_arch:
+    st.markdown("### Platform Architecture")
+    st.code("""
 ┌──────────────────────── STREAMLIT CLOUD UI ────────────────────────────┐
 │  Regulatory Monitor │ Obligation Impact │ Audit Prep │ Case Analytics  │
 └──────────┬──────────┴────────┬──────────┴─────┬──────┴────────┬───────┘
@@ -146,39 +299,36 @@ st.markdown("""
 ┌──────────────────────────────▼────────────────────────────────────────┐
 │   OpenAI GPT-4o    │   Claude (Fallback)  │  TF-IDF Search  │ SQLite │
 └───────────────────────────────────────────────────────────────────────┘
-</pre>
-</div>
-""", unsafe_allow_html=True)
+    """, language=None)
 
-# --- Tech Stack ---
-render_section("Technology Stack")
+    st.markdown("### Technology Stack")
 
-tc1, tc2, tc3, tc4 = st.columns(4)
-with tc1:
-    st.markdown("""
-    **AI / LLM**
-    - OpenAI GPT-4o (primary)
-    - Claude Sonnet (fallback)
-    - LangGraph orchestration
-    """)
-with tc2:
-    st.markdown("""
-    **Data**
-    - In-Memory TF-IDF search
-    - SQLite structured store
-    - 28 enforcement cases
-    """)
-with tc3:
-    st.markdown("""
-    **Regulatory**
-    - 12 active regulations
-    - 7 regulatory bodies
-    - 45+ evidence documents
-    """)
-with tc4:
-    st.markdown("""
-    **Application**
-    - Streamlit Cloud
-    - Plotly visualizations
-    - Python 3.11+
-    """)
+    tc1, tc2, tc3, tc4 = st.columns(4)
+    with tc1:
+        st.markdown("""
+        **AI / LLM**
+        - OpenAI GPT-4o (primary)
+        - Claude Sonnet (fallback)
+        - LangGraph orchestration
+        """)
+    with tc2:
+        st.markdown("""
+        **Data**
+        - In-Memory TF-IDF search
+        - SQLite structured store
+        - 28 enforcement cases
+        """)
+    with tc3:
+        st.markdown("""
+        **Regulatory**
+        - 12 active regulations
+        - 7 regulatory bodies
+        - 45+ evidence documents
+        """)
+    with tc4:
+        st.markdown("""
+        **Application**
+        - Streamlit Cloud
+        - Plotly visualizations
+        - Python 3.11+
+        """)
