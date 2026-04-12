@@ -1,5 +1,5 @@
 """
-PG&E Compliance AI - Database Layer
+PWE Compliance AI - Database Layer
 SQLite for prototype, PostgreSQL-ready schema for production.
 """
 
@@ -9,7 +9,7 @@ import json
 from datetime import datetime
 from contextlib import contextmanager
 
-DB_PATH = os.getenv("DATABASE_PATH", "./data/pge_compliance.db")
+DB_PATH = os.getenv("DATABASE_PATH", "./data/pwe_compliance.db")
 
 
 @contextmanager

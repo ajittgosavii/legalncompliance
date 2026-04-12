@@ -1,1 +1,1 @@
-# PG&E Compliance AI - Core Module
+# Pacific Western Energy (PWE) Compliance AI - Core Module

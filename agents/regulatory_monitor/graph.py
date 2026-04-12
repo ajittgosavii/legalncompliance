@@ -141,7 +141,7 @@ For each obligation, provide JSON array:
             obligations = [{
                 "obligation_id": f"{update['source']}-PARSE-ERR",
                 "description": "Failed to parse obligations — manual review required",
-                "responsible_entity": "PG&E",
+                "responsible_entity": "PWE",
                 "deadline": "TBD",
                 "measurement": "TBD",
                 "penalty": "TBD",
@@ -163,15 +163,15 @@ For each obligation, provide JSON array:
 
 
 def map_to_departments(state: MonitorState) -> MonitorState:
-    """Node 4: Map obligations to PG&E departments and assess impact."""
+    """Node 4: Map obligations to PWE departments and assess impact."""
     llm = get_claude_sonnet()
 
     obligations_text = json.dumps(state["extracted_obligations"], indent=2)
 
-    prompt = f"""Given these extracted regulatory obligations for PG&E, map each to the
-appropriate PG&E department(s) and assess operational impact.
+    prompt = f"""Given these extracted regulatory obligations for PWE, map each to the
+appropriate PWE department(s) and assess operational impact.
 
-PG&E DEPARTMENTS:
+PWE DEPARTMENTS:
 - Electric Operations (grid, transmission, distribution)
 - Gas Operations (pipeline, distribution, storage)
 - Wildfire Safety (vegetation mgmt, fire prevention, PSPS)

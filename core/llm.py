@@ -1,5 +1,5 @@
 """
-PG&E Compliance AI - LLM Client Configuration
+PWE Compliance AI - LLM Client Configuration
 Provides Claude (primary) and Ollama (local) LLM clients.
 """
 

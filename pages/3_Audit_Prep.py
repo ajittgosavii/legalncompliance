@@ -10,7 +10,7 @@ import os
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-st.set_page_config(page_title="Audit Preparation | PG&E Compliance AI", page_icon="📋", layout="wide")
+st.set_page_config(page_title="Audit Preparation | PWE Compliance AI", page_icon="📋", layout="wide")
 
 st.title("📋 Audit Analysis & Preparation")
 st.markdown("**Agentic AI** — Supervisor agent coordinates Evidence Collector, Gap Analyzer, and Response Drafter to produce audit-ready packages.")
@@ -24,7 +24,8 @@ with col1:
         "Audit Type",
         ["CPUC Wildfire Safety Audit", "NERC CIP Cybersecurity Audit",
          "CARB Emissions Compliance Audit", "FERC Transmission Planning Review",
-         "Custom Audit Scope"],
+         "PHMSA Pipeline Safety Audit", "Cal-OSHA Worker Safety Audit",
+         "Customer Data Privacy Audit", "Custom Audit Scope"],
     )
 
     if audit_scope == "Custom Audit Scope":
@@ -49,17 +50,57 @@ AUDIT_OBLIGATIONS = {
         {"id": "WF-003", "text": "50% reduction in PSPS events vs 2024 baseline", "category": "psps", "deadline": "2026-12-31"},
         {"id": "WF-004", "text": "Deploy HD cameras at 100% of Tier 3 transmission structures", "category": "monitoring", "deadline": "2026-06-30"},
         {"id": "WF-005", "text": "Quarterly compliance reports within 30 days of quarter end", "category": "reporting", "deadline": "Ongoing"},
+        {"id": "WF-006", "text": "Covered conductor on all new construction in Tier 2/3 HFTDs", "category": "grid_hardening", "deadline": "2026-01-01"},
+        {"id": "WF-007", "text": "Sectionalizing devices on all circuits serving critical facilities", "category": "grid_hardening", "deadline": "2026-12-31"},
+        {"id": "WF-008", "text": "AI-powered fire detection system deployment", "category": "technology", "deadline": "2026-06-30"},
     ],
     "NERC CIP Cybersecurity Audit": [
         {"id": "CIP-001", "text": "Network security monitoring for high/medium impact BES Cyber Systems", "category": "monitoring", "deadline": "2027-10-01"},
         {"id": "CIP-002", "text": "90-day network data retention", "category": "data_retention", "deadline": "2027-10-01"},
         {"id": "CIP-003", "text": "Quarterly anomaly detection baseline updates", "category": "detection", "deadline": "Ongoing"},
         {"id": "CIP-004", "text": "95% ESP network traffic monitoring coverage", "category": "coverage", "deadline": "2027-10-01"},
+        {"id": "CIP-005", "text": "Patch management within 35 days for critical security patches", "category": "patch_management", "deadline": "Ongoing"},
+        {"id": "CIP-006", "text": "Physical Security Perimeter access control and monitoring", "category": "physical_security", "deadline": "Ongoing"},
+        {"id": "CIP-007", "text": "Annual CIP security training for all personnel with BES access", "category": "training", "deadline": "2026-12-31"},
+        {"id": "CIP-008", "text": "Low-impact BES Cyber System electronic access controls at substations", "category": "access_control", "deadline": "2026-06-30"},
     ],
     "CARB Emissions Compliance Audit": [
         {"id": "EM-001", "text": "Monthly GHG emissions reporting (enhanced from quarterly)", "category": "reporting", "deadline": "2026-07-01"},
         {"id": "EM-002", "text": "Methane leak detection protocol implementation", "category": "monitoring", "deadline": "2026-07-01"},
         {"id": "EM-003", "text": "Allowance proceeds ratepayer benefit demonstration", "category": "financial", "deadline": "2026-12-31"},
+        {"id": "EM-004", "text": "SF6 switchgear emissions inventory and tracking", "category": "reporting", "deadline": "Ongoing"},
+        {"id": "EM-005", "text": "EPA Subpart W annual reporting — methane emissions", "category": "reporting", "deadline": "2026-03-31"},
+        {"id": "EM-006", "text": "Cap-and-Trade offset usage within 4% limit", "category": "financial", "deadline": "2026-12-31"},
+    ],
+    "FERC Transmission Planning Review": [
+        {"id": "TP-001", "text": "Model 3+ extreme weather scenarios in annual planning", "category": "planning", "deadline": "2026-06-30"},
+        {"id": "TP-002", "text": "N-1-1 contingency analysis with weather-correlated outage rates", "category": "reliability", "deadline": "2026-06-30"},
+        {"id": "TP-003", "text": "File updated planning criteria within 180 days of Order 901", "category": "filing", "deadline": "2026-05-20"},
+        {"id": "TP-004", "text": "Coordinate extreme weather assumptions with CAISO and neighboring regions", "category": "coordination", "deadline": "2026-06-30"},
+        {"id": "TP-005", "text": "Facility ratings validation for all transmission segments (FAC-008)", "category": "compliance", "deadline": "Ongoing"},
+    ],
+    "PHMSA Pipeline Safety Audit": [
+        {"id": "PS-001", "text": "Deploy advanced leak detection (satellite/aerial) covering 100% of system", "category": "monitoring", "deadline": "2028-01-01"},
+        {"id": "PS-002", "text": "Grade 2 leak repair within 6 months (reduced from 12)", "category": "maintenance", "deadline": "2026-07-01"},
+        {"id": "PS-003", "text": "Quarterly methane emissions quantification reports", "category": "reporting", "deadline": "2027-03-31"},
+        {"id": "PS-004", "text": "5% annual legacy pipe (cast iron/bare steel) replacement", "category": "infrastructure", "deadline": "Ongoing"},
+        {"id": "PS-005", "text": "GPS-enabled locate equipment and 1-hour emergency response", "category": "operations", "deadline": "2026-12-31"},
+        {"id": "PS-006", "text": "MAOP records verification for all pipeline segments", "category": "records", "deadline": "Ongoing"},
+    ],
+    "Cal-OSHA Worker Safety Audit": [
+        {"id": "WS-001", "text": "Heat illness prevention plan updated to 87°F threshold", "category": "heat_safety", "deadline": "2026-04-01"},
+        {"id": "WS-002", "text": "Wildfire smoke exposure procedures — N95 provision when AQI >151", "category": "smoke_safety", "deadline": "2026-04-01"},
+        {"id": "WS-003", "text": "Contractor safety program quarterly verification", "category": "contractor", "deadline": "Ongoing"},
+        {"id": "WS-004", "text": "Annual safety training in workers' primary language", "category": "training", "deadline": "2026-12-31"},
+        {"id": "WS-005", "text": "Lockout/tagout compliance for all electrical work", "category": "electrical_safety", "deadline": "Ongoing"},
+        {"id": "WS-006", "text": "Trench safety — shoring for excavations >5 feet", "category": "excavation", "deadline": "Ongoing"},
+    ],
+    "Customer Data Privacy Audit": [
+        {"id": "DP-001", "text": "AMI sub-15-minute data requires explicit opt-in consent", "category": "consent", "deadline": "2026-07-01"},
+        {"id": "DP-002", "text": "72-hour breach notification to affected customers", "category": "breach", "deadline": "2026-07-01"},
+        {"id": "DP-003", "text": "Green Button Connect My Data API for all residential accounts", "category": "data_access", "deadline": "2026-07-01"},
+        {"id": "DP-004", "text": "AI training data anonymized with k-anonymity (k>=5) or differential privacy", "category": "ai_privacy", "deadline": "2026-07-01"},
+        {"id": "DP-005", "text": "Granular energy usage data retention limit of 3 years", "category": "retention", "deadline": "2026-07-01"},
     ],
 }
 

@@ -10,7 +10,7 @@ import os
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-st.set_page_config(page_title="Obligation Impact | PG&E Compliance AI", page_icon="📊", layout="wide")
+st.set_page_config(page_title="Obligation Impact | PWE Compliance AI", page_icon="📊", layout="wide")
 
 st.title("📊 Obligation Impact Analysis")
 st.markdown("**Agentic AI** — Decomposes regulations, cross-references existing obligations, scores multi-dimensional impact, generates executive reports.")

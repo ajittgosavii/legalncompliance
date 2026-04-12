@@ -1,5 +1,5 @@
 """
-PG&E Compliance & Regulatory AI Platform
+PWE Compliance & Regulatory AI Platform
 Main Streamlit Application
 """
 
@@ -11,7 +11,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 st.set_page_config(
-    page_title="PG&E Compliance AI",
+    page_title="PWE Compliance AI",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -64,7 +64,7 @@ st.markdown("""
 # --- Header ---
 st.markdown("""
 <div class="main-header">
-    <h1 style="margin:0; font-size: 2.2rem;">PG&E Compliance & Regulatory AI Platform</h1>
+    <h1 style="margin:0; font-size: 2.2rem;">PWE Compliance & Regulatory AI Platform</h1>
     <p style="margin: 0.5rem 0 0 0; font-size: 1.1rem; opacity: 0.9;">
         Agentic AI & Gen AI for Regulatory Change Monitoring, Obligation Analysis, Audit Preparation & Case Analytics
     </p>

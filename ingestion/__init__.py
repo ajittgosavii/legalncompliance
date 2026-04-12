@@ -1,1 +1,1 @@
-# PG&E Compliance AI - Ingestion Module
+# Pacific Western Energy (PWE) Compliance AI - Ingestion Module

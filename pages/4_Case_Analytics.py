@@ -13,20 +13,20 @@ import pandas as pd
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-st.set_page_config(page_title="Case Analytics | PG&E Compliance AI", page_icon="🔍", layout="wide")
+st.set_page_config(page_title="Case Analytics | PWE Compliance AI", page_icon="🔍", layout="wide")
 
 st.title("🔍 Case Analytics")
 st.markdown("**Gen AI (RAG)** — Semantic search and AI analysis over historical CPUC/FERC enforcement cases, penalties, and precedents.")
 
 # --- Load Case Data ---
-from agents.case_analytics.chain import SAMPLE_CASES, get_case_stats, run_case_analytics
+from agents.case_analytics.chain import SAMPLE_CASES, PENALTY_TIMELINE, get_case_stats, run_case_analytics
 
 stats = get_case_stats()
 
 # --- Dashboard Overview ---
 st.subheader("Enforcement Case Dashboard")
 
-m1, m2, m3, m4 = st.columns(4)
+m1, m2, m3, m4, m5 = st.columns(5)
 with m1:
     st.metric("Total Cases", stats["total_cases"])
 with m2:
@@ -34,7 +34,42 @@ with m2:
 with m3:
     st.metric("Avg Penalty", f"${stats['average_penalty']/1e6:.1f}M")
 with m4:
-    st.metric("Cases with Penalties", stats["penalty_cases"])
+    st.metric("Max Single Penalty", f"${stats['max_penalty']/1e9:.1f}B")
+with m5:
+    st.metric("Regulators", len(stats["by_regulator"]))
+
+st.markdown("---")
+
+# --- Penalty Timeline (Year over Year) ---
+st.subheader("Penalty Trends Over Time")
+
+timeline_df = pd.DataFrame(PENALTY_TIMELINE)
+timeline_by_year = timeline_df.groupby(["year", "regulator"]).agg(
+    total=("total_penalties", "sum"),
+    cases=("case_count", "sum")
+).reset_index()
+
+fig_timeline = px.bar(
+    timeline_by_year, x="year", y="total", color="regulator",
+    title="Annual Penalties by Regulator ($)",
+    labels={"total": "Penalty Amount ($)", "year": "Year"},
+    color_discrete_sequence=px.colors.qualitative.Bold,
+    barmode="stack"
+)
+fig_timeline.update_layout(xaxis=dict(dtick=1), yaxis_title="Penalty Amount ($)")
+st.plotly_chart(fig_timeline, use_container_width=True)
+
+# Cumulative penalty trend
+yearly_total = timeline_df.groupby("year")["total_penalties"].sum().reset_index()
+yearly_total["cumulative"] = yearly_total["total_penalties"].cumsum()
+fig_cumulative = px.line(
+    yearly_total, x="year", y="cumulative",
+    title="Cumulative Penalty Exposure Over Time ($)",
+    labels={"cumulative": "Cumulative Penalties ($)", "year": "Year"},
+    markers=True
+)
+fig_cumulative.update_traces(line_color="#dc2626", line_width=3)
+st.plotly_chart(fig_cumulative, use_container_width=True)
 
 st.markdown("---")
 
@@ -55,18 +90,37 @@ with col_v2:
                       color="Type", color_discrete_sequence=px.colors.qualitative.Pastel)
     st.plotly_chart(fig_type, use_container_width=True)
 
-# Penalty distribution
-penalty_cases = [c for c in SAMPLE_CASES if c["penalty_amount"] > 0]
-if penalty_cases:
-    penalty_df = pd.DataFrame(penalty_cases)
-    penalty_df["penalty_millions"] = penalty_df["penalty_amount"] / 1e6
-    fig_pen = px.bar(penalty_df, x="case_number", y="penalty_millions",
-                     title="Penalty Amounts by Case ($M)",
-                     color="regulator",
-                     hover_data=["case_title"],
-                     color_discrete_sequence=px.colors.qualitative.Bold)
-    fig_pen.update_layout(xaxis_title="Case Number", yaxis_title="Penalty ($M)")
-    st.plotly_chart(fig_pen, use_container_width=True)
+# Penalty by category (from timeline data)
+col_v3, col_v4 = st.columns(2)
+
+with col_v3:
+    # Top penalties by case
+    penalty_cases = [c for c in SAMPLE_CASES if c["penalty_amount"] > 0]
+    if penalty_cases:
+        penalty_df = pd.DataFrame(penalty_cases)
+        penalty_df["penalty_millions"] = penalty_df["penalty_amount"] / 1e6
+        penalty_df = penalty_df.sort_values("penalty_amount", ascending=True).tail(10)
+        fig_pen = px.bar(penalty_df, y="case_number", x="penalty_millions",
+                         title="Top 10 Penalty Amounts ($M)",
+                         color="regulator",
+                         hover_data=["case_title"],
+                         orientation="h",
+                         color_discrete_sequence=px.colors.qualitative.Bold)
+        fig_pen.update_layout(yaxis_title="Case Number", xaxis_title="Penalty ($M)")
+        st.plotly_chart(fig_pen, use_container_width=True)
+
+with col_v4:
+    # Category breakdown from timeline
+    all_categories = []
+    for entry in PENALTY_TIMELINE:
+        for cat in entry["categories"]:
+            all_categories.append({"category": cat, "penalty": entry["total_penalties"] / len(entry["categories"])})
+    cat_df = pd.DataFrame(all_categories).groupby("category")["penalty"].sum().reset_index()
+    cat_df = cat_df.sort_values("penalty", ascending=False)
+    fig_cat = px.pie(cat_df, values="penalty", names="category",
+                     title="Penalty Distribution by Violation Category",
+                     color_discrete_sequence=px.colors.qualitative.Vivid)
+    st.plotly_chart(fig_cat, use_container_width=True)
 
 st.markdown("---")
 
@@ -95,7 +149,7 @@ with qc1:
         analysis_type = "precedent"
 with qc2:
     if st.button("Cybersecurity risk", use_container_width=True):
-        query = "What is PG&E's exposure to NERC CIP cybersecurity enforcement?"
+        query = "What is PWE's exposure to NERC CIP cybersecurity enforcement?"
         analysis_type = "risk"
 with qc3:
     if st.button("Penalty trends", use_container_width=True):

@@ -1,5 +1,5 @@
 """
-PG&E Compliance AI - Embedding Models
+PWE Compliance AI - Embedding Models
 Voyage Law-2 for legal/regulatory text, with OpenAI fallback.
 """
 

@@ -11,7 +11,7 @@ import time
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-st.set_page_config(page_title="Regulatory Monitor | PG&E Compliance AI", page_icon="📡", layout="wide")
+st.set_page_config(page_title="Regulatory Monitor | PWE Compliance AI", page_icon="📡", layout="wide")
 
 st.markdown("""
 <style>
@@ -55,7 +55,7 @@ if run_button:
     # --- Progress Tracking ---
     progress_container = st.container()
     with progress_container:
-        steps = ["Fetching regulatory updates", "Classifying changes with AI", "Extracting obligations", "Mapping to PG&E departments", "Generating alerts"]
+        steps = ["Fetching regulatory updates", "Classifying changes with AI", "Extracting obligations", "Mapping to PWE departments", "Generating alerts"]
         progress_bar = st.progress(0)
         status_text = st.empty()
 

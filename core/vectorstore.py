@@ -1,5 +1,5 @@
 """
-PG&E Compliance AI - Vector Store (ChromaDB)
+PWE Compliance AI - Vector Store (ChromaDB)
 Manages collections for regulatory documents, obligations, cases.
 """
 
@@ -11,10 +11,10 @@ from core.embeddings import get_embeddings
 CHROMA_DIR = os.getenv("CHROMA_PERSIST_DIR", "./data/chroma_db")
 
 # Collection names
-COLLECTION_REGULATIONS = "pge_regulations"
-COLLECTION_OBLIGATIONS = "pge_obligations"
-COLLECTION_CASES = "pge_cases"
-COLLECTION_AUDIT = "pge_audit_evidence"
+COLLECTION_REGULATIONS = "pwe_regulations"
+COLLECTION_OBLIGATIONS = "pwe_obligations"
+COLLECTION_CASES = "pwe_cases"
+COLLECTION_AUDIT = "pwe_audit_evidence"
 
 
 def get_chroma_client() -> chromadb.PersistentClient:

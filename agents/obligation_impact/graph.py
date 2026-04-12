@@ -62,13 +62,13 @@ Return a JSON array:
 
 
 def cross_reference(state: ImpactState) -> ImpactState:
-    """Check for conflicts/overlaps with existing PG&E obligations."""
+    """Check for conflicts/overlaps with existing PWE obligations."""
     llm = get_claude_sonnet()
 
     prompt = f"""Analyze these new obligations for potential conflicts or overlaps with
-existing PG&E regulatory requirements.
+existing PWE regulatory requirements.
 
-Known existing obligation areas for PG&E:
+Known existing obligation areas for PWE:
 - CPUC General Order 95 (overhead line construction)
 - CPUC General Order 165 (inspection cycles)
 - CPUC Wildfire Mitigation Plan (annual filing)
@@ -112,10 +112,10 @@ def score_impacts(state: ImpactState) -> ImpactState:
     """Score each obligation on cost, effort, risk, and timeline dimensions."""
     llm = get_claude_opus()  # Use Opus for nuanced scoring
 
-    prompt = f"""Score the impact of each obligation on PG&E operations.
-Consider PG&E's current financial position, workforce, and regulatory history.
+    prompt = f"""Score the impact of each obligation on PWE operations.
+Consider PWE's current financial position, workforce, and regulatory history.
 
-PG&E Context:
+PWE Context:
 - Annual revenue: ~$24B
 - Workforce: ~28,000 employees
 - Active wildfire liabilities and safety culture transformation
@@ -180,7 +180,7 @@ def generate_impact_report(state: ImpactState) -> ImpactState:
     """Generate executive impact report."""
     llm = get_claude_sonnet()
 
-    prompt = f"""Generate an executive impact assessment report for PG&E leadership.
+    prompt = f"""Generate an executive impact assessment report for PWE leadership.
 
 REGULATION: {state['regulation_source']}
 
