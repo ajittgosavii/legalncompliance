@@ -478,18 +478,18 @@ def render_page_header(title: str, description: str, ai_type: str = "agentic"):
 
 
 def render_kpi_row(kpis: list[dict]):
-    """Render a row of KPI cards. Each dict: {value, label, sublabel?}"""
+    """Render a row of KPI cards using Streamlit columns for reliable rendering."""
     import streamlit as st
-    cards = ""
-    for kpi in kpis:
-        sub = f'<div class="kpi-sublabel">{kpi.get("sublabel", "")}</div>' if kpi.get("sublabel") else ""
-        cards += f"""
-        <div class="kpi-card">
-            <div class="kpi-value">{kpi['value']}</div>
-            <div class="kpi-label">{kpi['label']}</div>
-            {sub}
-        </div>"""
-    st.markdown(f'<div class="kpi-row">{cards}</div>', unsafe_allow_html=True)
+    cols = st.columns(len(kpis))
+    for i, kpi in enumerate(kpis):
+        with cols[i]:
+            sub = f'<div class="kpi-sublabel">{kpi.get("sublabel", "")}</div>' if kpi.get("sublabel") else ""
+            st.markdown(f"""
+            <div class="kpi-card">
+                <div class="kpi-value">{kpi['value']}</div>
+                <div class="kpi-label">{kpi['label']}</div>
+                {sub}
+            </div>""", unsafe_allow_html=True)
 
 
 def render_section(title: str, subtitle: str = ""):
@@ -501,9 +501,10 @@ def render_section(title: str, subtitle: str = ""):
 
 
 def render_pipeline(steps: list[str], active_index: int = -1):
-    """Render a pipeline progress indicator."""
+    """Render a pipeline progress indicator using Streamlit columns."""
     import streamlit as st
-    html_steps = ""
+    cols = st.columns(len(steps) * 2 - 1)
+    col_idx = 0
     for i, step in enumerate(steps):
         if active_index < 0:
             cls = "step-pending"
@@ -513,14 +514,13 @@ def render_pipeline(steps: list[str], active_index: int = -1):
             cls = "step-active"
         else:
             cls = "step-pending"
-        html_steps += f'<div class="pipeline-step {cls}">{step}</div>'
+        with cols[col_idx]:
+            st.markdown(f'<div class="pipeline-step {cls}">{step}</div>', unsafe_allow_html=True)
+        col_idx += 1
         if i < len(steps) - 1:
-            html_steps += '<div class="pipeline-arrow">&#9654;</div>'
-    st.markdown(f"""
-    <div class="pipeline-container">
-        <div class="pipeline-steps">{html_steps}</div>
-    </div>
-    """, unsafe_allow_html=True)
+            with cols[col_idx]:
+                st.markdown('<div class="pipeline-arrow" style="text-align:center; padding-top:0.6rem; color:#cbd5e1;">&#9654;</div>', unsafe_allow_html=True)
+            col_idx += 1
 
 
 def render_empty_state(icon: str, title: str, description: str):
