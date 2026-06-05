@@ -1,5 +1,5 @@
 """
-PWE Compliance AI - Database Layer
+Regulatory Compliance AI - Database Layer
 SQLite for prototype, PostgreSQL-ready schema for production.
 """
 

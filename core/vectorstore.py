@@ -1,5 +1,5 @@
 """
-PWE Compliance AI - Vector Store
+Regulatory Compliance AI - Vector Store
 In-memory vector search for Streamlit Cloud compatibility.
 Uses simple TF-IDF similarity when ChromaDB is unavailable (Python 3.14 protobuf issue).
 """

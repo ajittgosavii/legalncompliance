@@ -18,7 +18,7 @@ if "OPENAI_API_KEY" in st.secrets:
 if "ANTHROPIC_API_KEY" in st.secrets:
     os.environ["ANTHROPIC_API_KEY"] = st.secrets["ANTHROPIC_API_KEY"]
 
-st.set_page_config(page_title="Case Analytics | PWE Compliance AI", page_icon="🔍", layout="wide")
+st.set_page_config(page_title="Case Analytics | Regulatory Compliance AI", page_icon="🔍", layout="wide")
 
 from core.styles import (inject_styles, render_page_header, render_kpi_row,
                           render_section, render_empty_state, severity_badge, source_badge)
@@ -118,7 +118,7 @@ with qc1:
         analysis_type = "precedent"
 with qc2:
     if st.button("Cybersecurity risk", use_container_width=True):
-        query = "What is PWE's exposure to NERC CIP cybersecurity enforcement?"
+        query = "What is the Company's exposure to NERC CIP cybersecurity enforcement?"
         analysis_type = "risk"
 with qc3:
     if st.button("Penalty trends", use_container_width=True):

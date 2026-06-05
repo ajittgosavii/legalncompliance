@@ -62,13 +62,13 @@ Return a JSON array:
 
 
 def cross_reference(state: ImpactState) -> ImpactState:
-    """Check for conflicts/overlaps with existing PWE obligations."""
+    """Check for conflicts/overlaps with existing the Company obligations."""
     llm = get_openai_primary()
 
     prompt = f"""Analyze these new obligations for potential conflicts or overlaps with
-existing PWE regulatory requirements.
+existing the Company regulatory requirements.
 
-Known existing obligation areas for PWE:
+Known existing obligation areas for the Company:
 - CPUC General Order 95 (overhead line construction)
 - CPUC General Order 165 (inspection cycles)
 - CPUC Wildfire Mitigation Plan (annual filing)
@@ -112,10 +112,10 @@ def score_impacts(state: ImpactState) -> ImpactState:
     """Score each obligation on cost, effort, risk, and timeline dimensions."""
     llm = get_openai_primary()  # GPT-4o for cost-effective scoring
 
-    prompt = f"""Score the impact of each obligation on PWE operations.
-Consider PWE's current financial position, workforce, and regulatory history.
+    prompt = f"""Score the impact of each obligation on the Company operations.
+Consider the Company's current financial position, workforce, and regulatory history.
 
-PWE Context:
+the Company Context:
 - Annual revenue: ~$24B
 - Workforce: ~28,000 employees
 - Active wildfire liabilities and safety culture transformation
@@ -180,7 +180,7 @@ def generate_impact_report(state: ImpactState) -> ImpactState:
     """Generate executive impact report."""
     llm = get_openai_primary()
 
-    prompt = f"""Generate an executive impact assessment report for PWE leadership.
+    prompt = f"""Generate an executive impact assessment report for the Company leadership.
 
 REGULATION: {state['regulation_source']}
 

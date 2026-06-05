@@ -289,10 +289,10 @@ Provide supervisor assessment:
     "readiness_score": 0-100,
     "executive_summary": "2-3 paragraph summary for audit committee",
     "critical_items": ["items requiring immediate executive attention"],
-    "strengths": ["areas where PWE is well-prepared"],
+    "strengths": ["areas where the Company is well-prepared"],
     "weaknesses": ["areas of concern"],
     "recommendations": ["prioritized list of actions before audit"],
-    "timeline_assessment": "whether PWE can be ready by audit date"
+    "timeline_assessment": "whether the Company can be ready by audit date"
 }}"""
 
     response = llm.invoke([

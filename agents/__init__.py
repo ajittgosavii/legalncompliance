@@ -1,1 +1,1 @@
-# Pacific Western Energy (PWE) Compliance AI - Agents Module
+# Regulatory Compliance AI - Agents Module

@@ -16,7 +16,7 @@ if "OPENAI_API_KEY" in st.secrets:
 if "ANTHROPIC_API_KEY" in st.secrets:
     os.environ["ANTHROPIC_API_KEY"] = st.secrets["ANTHROPIC_API_KEY"]
 
-st.set_page_config(page_title="Regulatory Monitor | PWE Compliance AI", page_icon="📡", layout="wide")
+st.set_page_config(page_title="Regulatory Monitor | Regulatory Compliance AI", page_icon="📡", layout="wide")
 
 from core.styles import (inject_styles, render_page_header, render_kpi_row,
                           render_section, render_pipeline, render_empty_state,
@@ -61,7 +61,7 @@ if run_button:
             st.write("Step 1/5: Fetching regulatory updates...")
             st.write("Step 2/5: Classifying changes with AI...")
             st.write("Step 3/5: Extracting obligations...")
-            st.write("Step 4/5: Mapping to PWE departments...")
+            st.write("Step 4/5: Mapping to Company departments...")
             st.write("Step 5/5: Generating prioritized alerts...")
             result = run_regulatory_monitor(source_filter=source_filter)
             status_ui.update(label="Pipeline complete!", state="complete", expanded=False)

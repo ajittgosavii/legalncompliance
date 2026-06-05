@@ -1,5 +1,5 @@
 """
-PWE Compliance AI - Embedding Models
+Regulatory Compliance AI - Embedding Models
 Lightweight implementation for Streamlit Cloud compatibility.
 Uses in-memory TF-IDF vectorstore (no external embedding APIs needed for prototype).
 """

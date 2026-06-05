@@ -1,5 +1,5 @@
 """
-PWE Compliance & Regulatory AI Platform
+Regulatory Compliance AI Platform
 Main Dashboard
 """
 
@@ -16,7 +16,7 @@ if "ANTHROPIC_API_KEY" in st.secrets:
     os.environ["ANTHROPIC_API_KEY"] = st.secrets["ANTHROPIC_API_KEY"]
 
 st.set_page_config(
-    page_title="PWE Compliance AI",
+    page_title="Regulatory Compliance AI",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -48,7 +48,7 @@ with st.sidebar:
 
 # --- Hero Banner ---
 render_hero(
-    title="PWE Compliance & Regulatory AI Platform",
+    title="Regulatory Compliance AI Platform",
     subtitle="Agentic AI and Generative AI for Regulatory Change Monitoring, Obligation Analysis, Audit Preparation, and Case Analytics",
     tech_text="OpenAI GPT-4o  ·  LangGraph Agentic Framework  ·  RAG-Enhanced Analytics"
 )
@@ -61,6 +61,68 @@ render_kpi_row([
     {"value": "12", "label": "Active Regulations", "sublabel": "Monitored in Real-Time"},
     {"value": "28", "label": "Case Records", "sublabel": "$19.8B Total Penalty History"},
 ])
+
+# --- Overview / What this tool does ---
+render_section("Overview", "What this platform does and why it is useful")
+
+st.markdown("""
+<div class="module-card" style="border-left: 4px solid #f97316;">
+    <div class="module-desc" style="font-size: 1.02rem; line-height: 1.6;">
+        <strong>Regulatory Compliance AI</strong> turns the slow, manual work of staying compliant
+        into an automated, AI-assisted workflow. It continuously watches federal and state regulators,
+        breaks new rules down into concrete, testable obligations, scores their business impact,
+        assembles audit-ready evidence, and mines decades of enforcement history for precedent — so
+        compliance, legal, and operations teams can shift from <em>reacting</em> to regulatory change
+        to <em>getting ahead</em> of it.
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+ov1, ov2, ov3 = st.columns(3)
+with ov1:
+    st.markdown("""
+    <div class="module-card agentic">
+        <div class="module-title" style="font-size: 1.1rem;">What it does</div>
+        <div class="module-desc">
+            • Monitors 7 regulators (CPUC, FERC, NERC, CARB, EPA, PHMSA, Cal-OSHA)<br>
+            • Extracts specific obligations, deadlines &amp; penalties from dense rule text<br>
+            • Scores cost, operational, timeline &amp; penalty-risk impact<br>
+            • Builds audit-ready packages with evidence &amp; gap analysis<br>
+            • Searches 28 enforcement cases for precedent and trends
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+with ov2:
+    st.markdown("""
+    <div class="module-card agentic">
+        <div class="module-title" style="font-size: 1.1rem;">Who it is for</div>
+        <div class="module-desc">
+            • Compliance &amp; regulatory-affairs teams<br>
+            • Legal counsel and risk management<br>
+            • Internal audit and controls<br>
+            • Operations leaders in regulated industries<br>
+            • Any organization that must track and respond to evolving regulation
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+with ov3:
+    st.markdown("""
+    <div class="module-card genai">
+        <div class="module-title" style="font-size: 1.1rem;">Why it is useful</div>
+        <div class="module-desc">
+            • Cuts hours of manual rule-reading to minutes<br>
+            • Surfaces new obligations &amp; deadlines early<br>
+            • Reduces penalty exposure and audit surprises<br>
+            • Grounds decisions in real enforcement precedent<br>
+            • Gives leadership a clear, prioritized view of risk
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+st.caption(
+    "How it works: a LangGraph agentic pipeline with OpenAI GPT-4o (Claude fallback) and "
+    "RAG over an enforcement-case knowledge base. Sample data is provided for demonstration."
+)
 
 # --- Module Cards ---
 render_section("AI Modules", "Select a module from the sidebar or click below to begin")
@@ -228,7 +290,7 @@ with tab_workflows:
         | Fetch | Scans 7 regulatory sources |
         | Classify | AI determines change type & severity |
         | Extract | Pulls specific obligations from text |
-        | Map | Assigns to PWE departments |
+        | Map | Assigns to Company departments |
         | Alert | Generates prioritized notifications |
 
         **Best for:** Staying current with regulatory changes,

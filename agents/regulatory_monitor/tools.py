@@ -19,7 +19,7 @@ SAMPLE_REGULATORY_UPDATES = [
         "title": "Decision 24-05-079: Updated Wildfire Mitigation Plan Requirements",
         "url": "https://docs.cpuc.ca.gov/PublishedDocs/Published/G000/M530/K123/530123456.PDF",
         "published_date": "2025-12-15",
-        "text": """The California Public Utilities Commission hereby orders Pacific Western Energy Company
+        "text": """The California Public Utilities Commission hereby orders the Company Company
         and all large electrical corporations to submit updated Wildfire Mitigation Plans (WMPs) incorporating
         the following new requirements effective January 1, 2026:
 
@@ -107,7 +107,7 @@ SAMPLE_REGULATORY_UPDATES = [
         EV charging infrastructure and time-of-use rate design for EV customers.
 
         REQUIREMENTS:
-        1. INFRASTRUCTURE DEPLOYMENT: PWE shall deploy 5,000 Level 2 and 500 DC Fast Charging
+        1. INFRASTRUCTURE DEPLOYMENT: the Company shall deploy 5,000 Level 2 and 500 DC Fast Charging
            stations in disadvantaged communities (DACs) by December 2028. At least 40% must be
            in multi-family housing locations.
 
@@ -242,11 +242,11 @@ SAMPLE_REGULATORY_UPDATES = [
            Maximum startup duration reduced from 48 to 24 hours. Cold start exemption eliminated.
 
         4. RESIDUAL RISK: Updated residual risk assessment incorporating latest health data
-           for hydrogen chloride and selenium. PWE facilities using natural gas are largely
+           for hydrogen chloride and selenium. the Company facilities using natural gas are largely
            exempt but must verify fuel certification annually.
 
         Compliance deadline: 3 years from publication (January 28, 2029).
-        Applicability: PWE has limited direct exposure (gas-fired fleet) but must verify
+        Applicability: the Company has limited direct exposure (gas-fired fleet) but must verify
         fuel specifications and maintain exemption documentation."""
     },
     # ==================== PHMSA ====================
@@ -355,7 +355,7 @@ def get_regulatory_detail(title: str) -> str:
 
 @tool
 def search_existing_obligations(query: str) -> str:
-    """Search existing PWE obligations in the vector store.
+    """Search existing the Company obligations in the vector store.
     Args:
         query: Natural language description of the obligation to search for
     """

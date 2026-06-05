@@ -15,27 +15,27 @@ SAMPLE_CASES = [
     # ==================== CPUC — WILDFIRE & SAFETY ====================
     {
         "case_number": "I.19-06-015",
-        "case_title": "Investigation into PWE Safety Culture and Governance",
+        "case_title": "Investigation into the Company Safety Culture and Governance",
         "regulator": "CPUC",
         "case_type": "investigation",
         "status": "resolved",
         "filing_date": "2019-06-27",
         "resolution_date": "2022-06-02",
         "penalty_amount": 0,
-        "summary": "CPUC investigation into PWE's safety culture following 2017-2018 wildfire events. Resulted in Enhanced Oversight and Enforcement Process (EOEP) with independent safety monitor.",
+        "summary": "CPUC investigation into the Company's safety culture following 2017-2018 wildfire events. Resulted in Enhanced Oversight and Enforcement Process (EOEP) with independent safety monitor.",
         "key_findings": "Deficient safety culture; inadequate vegetation management; insufficient grid hardening investment; poor organizational accountability.",
         "precedent_tags": "safety_culture,wildfire,enhanced_oversight,governance"
     },
     {
         "case_number": "A.20-06-012",
-        "case_title": "PWE 2020 Wildfire Mitigation Plan",
+        "case_title": "the Company 2020 Wildfire Mitigation Plan",
         "regulator": "CPUC",
         "case_type": "application",
         "status": "resolved",
         "filing_date": "2020-06-05",
         "resolution_date": "2021-02-11",
         "penalty_amount": 0,
-        "summary": "Review of PWE's Wildfire Mitigation Plan. CPUC approved with conditions including accelerated undergrounding and enhanced vegetation management in HFTDs.",
+        "summary": "Review of the Company's Wildfire Mitigation Plan. CPUC approved with conditions including accelerated undergrounding and enhanced vegetation management in HFTDs.",
         "key_findings": "WMP generally adequate; need for faster implementation of grid hardening; PSPS reduction targets set; quarterly reporting requirements imposed.",
         "precedent_tags": "wildfire,wmp,undergrounding,vegetation,psps"
     },
@@ -48,7 +48,7 @@ SAMPLE_CASES = [
         "filing_date": "2019-11-21",
         "resolution_date": "2023-09-14",
         "penalty_amount": 50000000,
-        "summary": "CPUC investigation into the Kincade Fire caused by PWE transmission equipment. Resulted in $50M settlement including penalties and safety improvements.",
+        "summary": "CPUC investigation into the Kincade Fire caused by the Company transmission equipment. Resulted in $50M settlement including penalties and safety improvements.",
         "key_findings": "Transmission tower failure; inadequate inspection of aging infrastructure; weather monitoring gaps.",
         "precedent_tags": "wildfire,enforcement,transmission,inspection,penalty"
     },
@@ -61,7 +61,7 @@ SAMPLE_CASES = [
         "filing_date": "2018-12-11",
         "resolution_date": "2022-09-29",
         "penalty_amount": 13500000000,
-        "summary": "Investigation into the Camp Fire that destroyed the town of Paradise, killing 85 people. PWE pled guilty to 84 counts of involuntary manslaughter. Total liability exceeding $13.5B through bankruptcy proceedings, victim fund, and settlements.",
+        "summary": "Investigation into the Camp Fire that destroyed the town of Paradise, killing 85 people. the Company pled guilty to 84 counts of involuntary manslaughter. Total liability exceeding $13.5B through bankruptcy proceedings, victim fund, and settlements.",
         "key_findings": "Failure to maintain aging transmission equipment (C-hook on Caribou-Palermo line); inadequate inspection programs; ignored known equipment risks; systemic failure to prioritize safety over cost reduction.",
         "precedent_tags": "wildfire,enforcement,catastrophic,fatalities,bankruptcy,criminal,record_penalty,camp_fire"
     },
@@ -87,7 +87,7 @@ SAMPLE_CASES = [
         "filing_date": "2020-08-22",
         "resolution_date": "2024-03-15",
         "penalty_amount": 110000000,
-        "summary": "Investigation into the Zogg Fire in Shasta County that killed 4 people, caused by a gray pine tree contacting PWE distribution lines. $110M in penalties and corrective actions.",
+        "summary": "Investigation into the Zogg Fire in Shasta County that killed 4 people, caused by a gray pine tree contacting the Company distribution lines. $110M in penalties and corrective actions.",
         "key_findings": "Tree previously identified as requiring removal but not removed; vegetation management backlog; inadequate risk prioritization for high-fire-threat zones.",
         "precedent_tags": "wildfire,enforcement,vegetation,fatalities,penalty,zogg_fire"
     },
@@ -100,7 +100,7 @@ SAMPLE_CASES = [
         "filing_date": "2021-06-30",
         "resolution_date": None,
         "penalty_amount": 0,
-        "summary": "Ongoing investigation into the Dixie Fire, the largest single (non-complex) fire in California history at 963,309 acres. Caused by a tree falling on PWE power line near Cresta Dam.",
+        "summary": "Ongoing investigation into the Dixie Fire, the largest single (non-complex) fire in California history at 963,309 acres. Caused by a tree falling on the Company power line near Cresta Dam.",
         "key_findings": "Pending final determination; preliminary findings include delayed de-energization, vegetation management gaps, aging infrastructure near hydroelectric facilities.",
         "precedent_tags": "wildfire,investigation,active,dixie_fire,largest_fire,pending"
     },
@@ -120,67 +120,67 @@ SAMPLE_CASES = [
     },
     {
         "case_number": "I.12-01-007",
-        "case_title": "Investigation into PWE Natural Gas Distribution Pipeline Records",
+        "case_title": "Investigation into the Company Natural Gas Distribution Pipeline Records",
         "regulator": "CPUC",
         "case_type": "investigation",
         "status": "resolved",
         "filing_date": "2012-01-12",
         "resolution_date": "2015-12-17",
         "penalty_amount": 38000000,
-        "summary": "Follow-on investigation into PWE's gas pipeline recordkeeping practices. Found systemic deficiencies in Maximum Allowable Operating Pressure (MAOP) records. $38M penalty.",
+        "summary": "Follow-on investigation into the Company's gas pipeline recordkeeping practices. Found systemic deficiencies in Maximum Allowable Operating Pressure (MAOP) records. $38M penalty.",
         "key_findings": "Incomplete pipeline records dating back decades; inability to verify MAOP for hundreds of pipeline segments; inadequate data management systems; records retention failures.",
         "precedent_tags": "pipeline_safety,records,penalty,gas_operations,maop,data_management"
     },
     {
         "case_number": "I.17-02-002",
-        "case_title": "PWE Gas Safety OII — Locate and Mark Practices",
+        "case_title": "the Company Gas Safety OII — Locate and Mark Practices",
         "regulator": "CPUC",
         "case_type": "enforcement",
         "status": "resolved",
         "filing_date": "2017-02-14",
         "resolution_date": "2019-08-22",
         "penalty_amount": 14000000,
-        "summary": "Investigation into PWE's One-Call locate and mark practices for underground gas facilities. Found pattern of late or missed locates creating third-party dig-in risks. $14M penalty.",
-        "key_findings": "Chronic late responses to One-Call requests; insufficient locate crews; inaccurate facility maps; multiple third-party dig-in incidents traceable to PWE failures.",
+        "summary": "Investigation into the Company's One-Call locate and mark practices for underground gas facilities. Found pattern of late or missed locates creating third-party dig-in risks. $14M penalty.",
+        "key_findings": "Chronic late responses to One-Call requests; insufficient locate crews; inaccurate facility maps; multiple third-party dig-in incidents traceable to the Company failures.",
         "precedent_tags": "pipeline_safety,enforcement,one_call,locate_mark,penalty,dig_in"
     },
     # ==================== CPUC — RATE CASES & FINANCIAL ====================
     {
         "case_number": "A.21-06-021",
-        "case_title": "PWE 2023 General Rate Case",
+        "case_title": "the Company 2023 General Rate Case",
         "regulator": "CPUC",
         "case_type": "rate_case",
         "status": "resolved",
         "filing_date": "2021-06-30",
         "resolution_date": "2023-11-16",
         "penalty_amount": 0,
-        "summary": "PWE's General Rate Case for 2023-2026. Authorized revenue requirement of ~$15.7B over 4 years. Included significant wildfire safety and grid modernization investments.",
+        "summary": "the Company's General Rate Case for 2023-2026. Authorized revenue requirement of ~$15.7B over 4 years. Included significant wildfire safety and grid modernization investments.",
         "key_findings": "Rate increases approved for safety investments; undergrounding program funded; customer affordability concerns noted; performance metrics tied to rate recovery.",
         "precedent_tags": "rate_case,revenue_requirement,grid_modernization,affordability"
     },
     {
         "case_number": "A.23-11-006",
-        "case_title": "PWE 2027 General Rate Case Application",
+        "case_title": "the Company 2027 General Rate Case Application",
         "regulator": "CPUC",
         "case_type": "rate_case",
         "status": "active",
         "filing_date": "2023-11-15",
         "resolution_date": None,
         "penalty_amount": 0,
-        "summary": "PWE's General Rate Case for 2027-2030 cycle. Requesting approximately $18.2B in revenue requirements over 4 years for grid modernization, wildfire hardening, and clean energy transition.",
+        "summary": "the Company's General Rate Case for 2027-2030 cycle. Requesting approximately $18.2B in revenue requirements over 4 years for grid modernization, wildfire hardening, and clean energy transition.",
         "key_findings": "Pending decision; intervenors contesting affordability; rate impact estimated at 8-12% increase; CPUC balancing safety investment with customer bill concerns.",
         "precedent_tags": "rate_case,active,revenue_requirement,affordability,grid_modernization,clean_energy"
     },
     {
         "case_number": "A.22-04-008",
-        "case_title": "PWE Undergrounding Program Cost Recovery",
+        "case_title": "the Company Undergrounding Program Cost Recovery",
         "regulator": "CPUC",
         "case_type": "application",
         "status": "resolved",
         "filing_date": "2022-04-12",
         "resolution_date": "2024-01-25",
         "penalty_amount": 0,
-        "summary": "PWE application for 10,000-mile undergrounding program under SB 884. Approved with cost cap of $5.9M per mile for Tier 3 HFTD segments. Total approved program cost ~$20B over 10 years.",
+        "summary": "the Company application for 10,000-mile undergrounding program under SB 884. Approved with cost cap of $5.9M per mile for Tier 3 HFTD segments. Total approved program cost ~$20B over 10 years.",
         "key_findings": "Cost benchmarks established; unit cost accountability; independent monitor required; quarterly progress reporting; cost overruns above cap borne by shareholders.",
         "precedent_tags": "undergrounding,cost_recovery,wildfire,grid_hardening,sb_884,capital_investment"
     },
@@ -327,7 +327,7 @@ SAMPLE_CASES = [
         "filing_date": "2020-10-15",
         "resolution_date": "2022-07-22",
         "penalty_amount": 3200000,
-        "summary": "PHMSA enforcement action for violations of 49 CFR 192 (Transportation of Natural Gas by Pipeline). Found 14 probable violations related to integrity management, corrosion control, and emergency response at PWE gas transmission facilities. $3.2M penalty.",
+        "summary": "PHMSA enforcement action for violations of 49 CFR 192 (Transportation of Natural Gas by Pipeline). Found 14 probable violations related to integrity management, corrosion control, and emergency response at the Company gas transmission facilities. $3.2M penalty.",
         "key_findings": "Integrity management program deficiencies; corrosion control failures at 7 pipeline crossings; inadequate SCADA monitoring at 3 compressor stations; emergency response plan not updated for 2 years.",
         "precedent_tags": "pipeline_safety,phmsa,enforcement,penalty,integrity_management,corrosion,federal"
     },
@@ -354,7 +354,7 @@ SAMPLE_CASES = [
         "filing_date": "2022-04-18",
         "resolution_date": "2023-01-09",
         "penalty_amount": 425000,
-        "summary": "Cal-OSHA serious citations following the electrocution death of a PWE lineworker during de-energized line maintenance. Found minimum approach distance violations and lockout/tagout failures. $425K penalty.",
+        "summary": "Cal-OSHA serious citations following the electrocution death of a the Company lineworker during de-energized line maintenance. Found minimum approach distance violations and lockout/tagout failures. $425K penalty.",
         "key_findings": "Minimum approach distance not maintained; lockout/tagout procedures not followed; inadequate job briefing documentation; crew foreman failed to verify de-energized status before work commenced.",
         "precedent_tags": "worker_safety,cal_osha,enforcement,penalty,electrocution,fatality,lockout_tagout"
     },
@@ -368,7 +368,7 @@ SAMPLE_CASES = [
         "resolution_date": "2024-07-15",
         "penalty_amount": 285000,
         "summary": "Cal-OSHA citations for serious and willful violations following a trench collapse during gas service line installation. Worker hospitalized with crush injuries. $285K penalty.",
-        "key_findings": "Trench exceeding 5 feet without shoring; competent person not present on site; soil classification not performed; prior OSHA warnings for similar violations at PWE worksites within 18 months.",
+        "key_findings": "Trench exceeding 5 feet without shoring; competent person not present on site; soil classification not performed; prior OSHA warnings for similar violations at the Company worksites within 18 months.",
         "precedent_tags": "worker_safety,cal_osha,enforcement,penalty,trench,gas_operations,willful_violation"
     },
     {
@@ -380,21 +380,21 @@ SAMPLE_CASES = [
         "filing_date": "2024-07-23",
         "resolution_date": "2025-02-10",
         "penalty_amount": 180000,
-        "summary": "Citations for heat illness prevention failures involving a contracted vegetation management crew working in Tier 3 HFTD. Two workers hospitalized with heat stroke. $180K penalty against PWE as controlling employer.",
-        "key_findings": "Shade structures not provided; water inadequately supplied; no acclimatization plan for new workers; heat illness prevention plan not communicated in workers' primary language (Spanish); PWE liable as controlling employer of contractor crew.",
+        "summary": "Citations for heat illness prevention failures involving a contracted vegetation management crew working in Tier 3 HFTD. Two workers hospitalized with heat stroke. $180K penalty against the Company as controlling employer.",
+        "key_findings": "Shade structures not provided; water inadequately supplied; no acclimatization plan for new workers; heat illness prevention plan not communicated in workers' primary language (Spanish); the Company liable as controlling employer of contractor crew.",
         "precedent_tags": "worker_safety,cal_osha,enforcement,penalty,heat_illness,vegetation,contractor,controlling_employer"
     },
     # ==================== CEC — ENERGY COMMISSION ====================
     {
         "case_number": "CEC-2024-SIP-001",
-        "case_title": "CEC Strategic Reliability Reserve: PWE Compliance Review",
+        "case_title": "CEC Strategic Reliability Reserve: the Company Compliance Review",
         "regulator": "CEC",
         "case_type": "audit",
         "status": "resolved",
         "filing_date": "2024-01-10",
         "resolution_date": "2024-09-15",
         "penalty_amount": 0,
-        "summary": "CEC review of PWE's compliance with Strategic Reliability Reserve requirements under SB 846. No penalties but findings on demand response program integration and battery storage deployment timelines.",
+        "summary": "CEC review of the Company's compliance with Strategic Reliability Reserve requirements under SB 846. No penalties but findings on demand response program integration and battery storage deployment timelines.",
         "key_findings": "Battery storage interconnection delays (avg 14 months vs 9 month target); demand response participation rates below forecast; load forecasting methodology needs updating for EV adoption curves.",
         "precedent_tags": "cec,reliability,battery_storage,demand_response,ev,compliance_review"
     },
@@ -512,10 +512,10 @@ def run_case_analytics(query: str, analysis_type: str = "precedent") -> dict:
         "precedent": "Find precedent cases most relevant to the query. Analyze how similar situations were resolved and what penalties were imposed.",
         "trend": "Identify enforcement trends over time. Are penalties increasing? Are certain violation types becoming more common?",
         "risk": "Assess compliance risk based on enforcement history. What areas face the highest enforcement risk and potential penalties?",
-        "summary": "Provide a comprehensive summary of all relevant cases, key patterns, and strategic implications for PWE.",
+        "summary": "Provide a comprehensive summary of all relevant cases, key patterns, and strategic implications for the Company.",
     }
 
-    prompt = f"""Analyze PWE's regulatory case history based on this query.
+    prompt = f"""Analyze the Company's regulatory case history based on this query.
 
 QUERY: {query}
 ANALYSIS TYPE: {analysis_type}
@@ -539,7 +539,7 @@ Provide a comprehensive analysis as JSON:
         {{
             "case_number": "ID",
             "relevance": "why this case is relevant",
-            "key_takeaway": "main lesson for PWE"
+            "key_takeaway": "main lesson for the Company"
         }}
     ],
     "patterns_identified": ["list of patterns"],
@@ -548,7 +548,7 @@ Provide a comprehensive analysis as JSON:
         "highest_risk_areas": ["areas"],
         "estimated_penalty_exposure": "dollar range"
     }},
-    "recommendations": ["actionable recommendations for PWE"],
+    "recommendations": ["actionable recommendations for the Company"],
     "data_visualizations": {{
         "penalties_by_year": {{"year": amount}},
         "cases_by_type": {{"type": count}},

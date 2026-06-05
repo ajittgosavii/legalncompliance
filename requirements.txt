@@ -1,4 +1,4 @@
-# PWE Compliance AI - Dependencies
+# Regulatory Compliance AI - Dependencies
 # Core
 streamlit>=1.40.0
 python-dotenv>=1.0.0

@@ -15,7 +15,7 @@ if "OPENAI_API_KEY" in st.secrets:
 if "ANTHROPIC_API_KEY" in st.secrets:
     os.environ["ANTHROPIC_API_KEY"] = st.secrets["ANTHROPIC_API_KEY"]
 
-st.set_page_config(page_title="Obligation Impact | PWE Compliance AI", page_icon="📊", layout="wide")
+st.set_page_config(page_title="Obligation Impact | Regulatory Compliance AI", page_icon="📊", layout="wide")
 
 from core.styles import (inject_styles, render_page_header, render_kpi_row,
                           render_section, render_pipeline, render_empty_state, severity_badge)

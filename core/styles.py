@@ -1,5 +1,5 @@
 """
-PWE Compliance AI - Enterprise Design System
+Regulatory Compliance AI - Enterprise Design System
 Shared CSS and UI components for professional enterprise look.
 """
 
