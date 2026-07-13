@@ -33,3 +33,4 @@ Thumbs.db
 
 # Generated deliverables
 *.docx
+# Deck is regenerable via docs/make_deck.py, but we ship it for convenience

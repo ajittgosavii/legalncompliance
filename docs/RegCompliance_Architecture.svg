@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 960" width="1440" height="960" font-family="Segoe UI, Inter, system-ui, sans-serif">
+  <defs>
+    <marker id="a" markerWidth="10" markerHeight="10" refX="9" refY="3.2" orient="auto">
+      <path d="M0,0 L0,6.4 L9,3.2 z" fill="#64748b"/>
+    </marker>
+    <marker id="ar" markerWidth="10" markerHeight="10" refX="9" refY="3.2" orient="auto">
+      <path d="M0,0 L0,6.4 L9,3.2 z" fill="#c2410c"/>
+    </marker>
+    <style>
+      .lbl  { font-size:13px; font-weight:600; fill:#0f172a; }
+      .sub  { font-size:11px; fill:#475569; }
+      .tiny { font-size:10px; fill:#64748b; }
+      .band { font-size:11px; font-weight:700; letter-spacing:1.4px; fill:#94a3b8; }
+      .ag   { font-size:11px; font-weight:600; fill:#1e293b; }
+      .flow { stroke:#64748b; stroke-width:1.6; fill:none; marker-end:url(#a); }
+      .flowO{ stroke:#c2410c; stroke-width:2;   fill:none; marker-end:url(#ar); }
+    </style>
+  </defs>
+
+  <rect width="1440" height="960" fill="#ffffff"/>
+
+  <text x="40" y="44" font-size="25" font-weight="700" fill="#0f172a">Regulatory Compliance AI — High-Level Architecture</text>
+  <text x="40" y="68" font-size="13.5" fill="#475569">PG&amp;E · Seven agents turn dense regulatory prose into testable obligations, scored impact, and audit-ready evidence. A human always signs off.</text>
+  <line x1="40" y1="84" x2="1400" y2="84" stroke="#e2e8f0" stroke-width="1.5"/>
+
+  <!-- BAND 1 — SOURCES -->
+  <text x="40" y="116" class="band">1 — REGULATORY SOURCES  ·  9 BODIES</text>
+  <rect x="40" y="130" width="1360" height="96" rx="10" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+  <g font-size="11.5" font-weight="700" fill="#1e40af">
+    <rect x="60"  y="152" width="130" height="30" rx="5" fill="#dbeafe"/><text x="86"  y="172">CPUC</text>
+    <rect x="200" y="152" width="130" height="30" rx="5" fill="#fed7aa"/><text x="228" y="172" fill="#9a3412">OEIS</text>
+    <rect x="340" y="152" width="130" height="30" rx="5" fill="#dbeafe"/><text x="368" y="172">FERC</text>
+    <rect x="480" y="152" width="130" height="30" rx="5" fill="#dbeafe"/><text x="508" y="172">NERC</text>
+    <rect x="620" y="152" width="130" height="30" rx="5" fill="#dbeafe"/><text x="648" y="172">CARB</text>
+    <rect x="760" y="152" width="130" height="30" rx="5" fill="#dbeafe"/><text x="792" y="172">EPA</text>
+    <rect x="900" y="152" width="130" height="30" rx="5" fill="#dbeafe"/><text x="922" y="172">PHMSA</text>
+    <rect x="1040" y="152" width="150" height="30" rx="5" fill="#dbeafe"/><text x="1062" y="172">Cal-OSHA</text>
+    <rect x="1200" y="152" width="130" height="30" rx="5" fill="#dbeafe"/><text x="1230" y="172">CEC</text>
+  </g>
+  <text x="60" y="205" style="font-size:11px;font-weight:600;fill:#9a3412;">OEIS — Wildfire Mitigation Plans are filed with and approved by OEIS, NOT the CPUC. OEIS issues the Safety Certification; the CPUC ratifies.</text>
+  <text x="60" y="220" class="tiny">Today: fixture data. Production: live ingestion connectors + PDF/HTML parsing + change detection (the single biggest work item).</text>
+
+  <path class="flow" d="M720,226 L720,272"/>
+
+  <!-- BAND 2 — AGENTS -->
+  <text x="40" y="266" class="band">2 — SEVEN AGENTS  ·  FOUR WORKFLOWS  ·  LangGraph</text>
+  <rect x="40" y="280" width="1360" height="240" rx="10" fill="#fffbeb" stroke="#fcd34d" stroke-width="1.5"/>
+
+  <!-- WF-01 -->
+  <rect x="60" y="302" width="315" height="196" rx="8" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.2"/>
+  <text x="76" y="324" class="lbl">WF-01 · Regulatory Monitor</text>
+  <text x="76" y="342" class="tiny">5-node pipeline · 2N+1 LLM calls</text>
+  <g class="ag">
+    <rect x="76" y="356" width="120" height="24" rx="4" fill="#f1f5f9"/><text x="86" y="372">Fetch</text>
+    <rect x="76" y="386" width="120" height="24" rx="4" fill="#f1f5f9"/><text x="86" y="402">Classify</text>
+    <rect x="76" y="416" width="283" height="24" rx="4" fill="#fee2e2"/><text x="86" y="432" fill="#991b1b">Extract + VERIFY CITATION</text>
+    <rect x="76" y="446" width="120" height="24" rx="4" fill="#f1f5f9"/><text x="86" y="462">Map to depts</text>
+    <rect x="206" y="446" width="120" height="24" rx="4" fill="#f1f5f9"/><text x="216" y="462">Alert</text>
+  </g>
+  <text x="206" y="372" class="tiny">who · what · by when</text>
+  <text x="206" y="402" class="tiny">how measured · penalty</text>
+
+  <!-- WF-02 -->
+  <rect x="391" y="302" width="270" height="196" rx="8" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.2"/>
+  <text x="407" y="324" class="lbl">WF-02 · Obligation Impact</text>
+  <text x="407" y="342" class="tiny">4-node graph · 4 LLM calls</text>
+  <g class="ag">
+    <rect x="407" y="356" width="238" height="24" rx="4" fill="#f1f5f9"/><text x="417" y="372">Decompose to atomic obligations</text>
+    <rect x="407" y="386" width="238" height="24" rx="4" fill="#f1f5f9"/><text x="417" y="402">Cross-reference for conflicts</text>
+    <rect x="407" y="416" width="238" height="24" rx="4" fill="#dbeafe"/><text x="417" y="432">Score: cost · ops · time · penalty</text>
+    <rect x="407" y="446" width="238" height="24" rx="4" fill="#f1f5f9"/><text x="417" y="462">Executive report</text>
+  </g>
+
+  <!-- WF-03 -->
+  <rect x="677" y="302" width="430" height="196" rx="8" fill="#fff7ed" stroke="#f97316" stroke-width="2"/>
+  <text x="693" y="324" font-size="13px" font-weight="700" fill="#9a3412">WF-03 · Audit Preparation — THE FLAGSHIP</text>
+  <text x="693" y="342" class="tiny">Supervisor + 3 specialists · 5 LLM calls</text>
+  <g class="ag">
+    <rect x="693" y="356" width="398" height="24" rx="4" fill="#1e40af"/><text x="703" y="372" fill="#ffffff">SUPERVISOR — plans the audit approach</text>
+    <rect x="693" y="386" width="128" height="24" rx="4" fill="#ffffff" stroke="#f97316"/><text x="701" y="402">Evidence Collector</text>
+    <rect x="828" y="386" width="128" height="24" rx="4" fill="#ffffff" stroke="#f97316"/><text x="836" y="402">Gap Analyzer</text>
+    <rect x="963" y="386" width="128" height="24" rx="4" fill="#ffffff" stroke="#f97316"/><text x="971" y="402">Response Drafter</text>
+    <rect x="693" y="416" width="398" height="24" rx="4" fill="#dbeafe"/><text x="703" y="432" fill="#1e3a8a">SUPERVISOR — reviews the specialists against its own plan</text>
+    <rect x="693" y="446" width="398" height="24" rx="4" fill="#166534"/><text x="703" y="462" fill="#ffffff">0–100 AUDIT READINESS SCORE</text>
+  </g>
+
+  <!-- WF-04 -->
+  <rect x="1123" y="302" width="257" height="196" rx="8" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.2"/>
+  <text x="1139" y="324" class="lbl">WF-04 · Case Analytics</text>
+  <text x="1139" y="342" class="tiny">RAG chain · 1 LLM call</text>
+  <g class="ag">
+    <rect x="1139" y="356" width="225" height="24" rx="4" fill="#f1f5f9"/><text x="1149" y="372">Retrieve precedent</text>
+    <rect x="1139" y="386" width="225" height="24" rx="4" fill="#f1f5f9"/><text x="1149" y="402">Trend · Risk · Summary</text>
+    <rect x="1139" y="416" width="225" height="24" rx="4" fill="#f1f5f9"/><text x="1149" y="432">Penalty dashboards</text>
+  </g>
+  <text x="1139" y="465" class="tiny">Loads with NO LLM call —</text>
+  <text x="1139" y="478" class="tiny">the zero-cost demo entry point</text>
+
+  <path class="flowO" d="M720,520 L720,566"/>
+
+  <!-- BAND 3 — THE CHAIN -->
+  <text x="40" y="560" class="band">3 — WHAT MODULE 3 ACTUALLY PRODUCES</text>
+  <rect x="40" y="574" width="1360" height="72" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+  <g font-size="12" font-weight="700" fill="#0f172a">
+    <text x="66"  y="614">REGULATION</text>
+    <text x="248" y="614">→  OBLIGATION</text>
+    <text x="446" y="614">→  EVIDENCE DOC</text>
+    <text x="664" y="614">→  GAP</text>
+    <text x="786" y="614">→  OWNER + DATE</text>
+    <text x="1000" y="614">→  DRAFTED RESPONSE</text>
+  </g>
+  <text x="66" y="634" class="tiny">The traceable chain a regulator asks for when it says “show me.” This is the product.</text>
+
+  <!-- BAND 4 — THE GATE -->
+  <text x="40" y="686" class="band">4 — THE GATE  ·  why this is safe in a regulated utility</text>
+
+  <rect x="40" y="700" width="660" height="140" rx="10" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
+  <text x="62" y="726" font-size="13.5" font-weight="700" fill="#991b1b">PROVENANCE — a CODE check, not a prompt</text>
+  <text x="62" y="750" class="sub">Every obligation must quote the regulation VERBATIM.</text>
+  <text x="62" y="768" class="sub">The system then verifies the quote actually exists in the source.</text>
+  <text x="62" y="792" style="font-size:11.5px;font-weight:600;fill:#991b1b;">The model cannot talk its way past it, because it is code.</text>
+  <text x="62" y="812" class="tiny">Unverifiable → flagged, confidence downgraded, shown as “⚠ Quote not found in source”.</text>
+  <text x="62" y="828" class="tiny">An invented deadline in a compliance register is a material harm, not a rounding error.</text>
+
+  <rect x="720" y="700" width="680" height="140" rx="10" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+  <text x="742" y="726" font-size="13.5" font-weight="700" fill="#166534">HUMAN REVIEW — a gate, not a suggestion</text>
+  <text x="742" y="750" class="sub">Module 3 drafts text “suitable for regulatory submission”.</text>
+  <text x="742" y="768" class="sub">Every package is stamped PENDING_HUMAN_REVIEW.</text>
+  <text x="742" y="792" style="font-size:11.5px;font-weight:600;fill:#166534;">The platform PREPARES the package. It never files it.</text>
+  <text x="742" y="812" class="tiny">Nothing reaches a regulator without qualified sign-off. PG&amp;E remains accountable.</text>
+  <text x="742" y="828" class="tiny">Where the source is silent, agents must write “not stated in source” — never estimate.</text>
+
+  <!-- BAND 5 -->
+  <rect x="40" y="864" width="1360" height="66" rx="10" fill="#0f172a"/>
+  <text x="62" y="892" font-size="14" font-weight="700" fill="#ffffff">SWAPPABLE INDUSTRY PACKS  —  the agents contain NO industry logic</text>
+  <text x="62" y="914" font-size="11.5" fill="#94a3b8">Energy &amp; Utilities (PG&amp;E) · Retail · Resources · Services   —   switch the pack and all 7 agents re-target. Each new vertical ≈ 2.5 FTE-months.</text>
+  <text x="1000" y="903" font-size="11" fill="#cbd5e1">GPT-4o → automatic failover → Claude Sonnet</text>
+</svg>
