@@ -11,18 +11,16 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 # Load API keys from Streamlit secrets
-if "OPENAI_API_KEY" in st.secrets:
-    os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
-if "ANTHROPIC_API_KEY" in st.secrets:
-    os.environ["ANTHROPIC_API_KEY"] = st.secrets["ANTHROPIC_API_KEY"]
 
 st.set_page_config(page_title="Regulatory Monitor | Regulatory Compliance AI", page_icon="📡", layout="wide")
 
 from core.styles import (inject_styles, render_page_header, render_kpi_row,
                           render_section, render_pipeline, render_empty_state,
                           severity_badge, source_badge)
+from core.ui import bootstrap, require_llm, render_review_gate, render_data_provenance, citation_badge
 
 inject_styles()
+pack = bootstrap()
 
 render_page_header(
     title="Regulatory Change Monitor",
@@ -39,8 +37,8 @@ col1, col2, col3 = st.columns([2, 4, 2])
 with col1:
     source_filter = st.selectbox(
         "Filter by Regulator",
-        ["all", "CPUC", "FERC", "NERC", "CARB", "EPA", "PHMSA", "Cal-OSHA"],
-        help="Monitor a specific regulatory body or all sources"
+        ["all"] + [r["code"] for r in pack["regulators"]],
+        help="Monitor a specific regulatory body or all sources",
     )
 with col3:
     st.markdown("")
@@ -49,10 +47,7 @@ with col3:
 st.markdown("---")
 
 if run_button:
-    api_key = os.getenv("OPENAI_API_KEY", "")
-    if not api_key:
-        st.error("OPENAI_API_KEY not set. Please configure it in Streamlit Cloud Secrets (Settings > Secrets).")
-        st.stop()
+    require_llm()
 
     try:
         from agents.regulatory_monitor.graph import run_regulatory_monitor
@@ -61,7 +56,7 @@ if run_button:
             st.write("Step 1/5: Fetching regulatory updates...")
             st.write("Step 2/5: Classifying changes with AI...")
             st.write("Step 3/5: Extracting obligations...")
-            st.write("Step 4/5: Mapping to Company departments...")
+            st.write("Step 4/5: Mapping to departments...")
             st.write("Step 5/5: Generating prioritized alerts...")
             result = run_regulatory_monitor(source_filter=source_filter)
             status_ui.update(label="Pipeline complete!", state="complete", expanded=False)
@@ -78,12 +73,26 @@ if run_button:
             depts.add(m.get("primary_department", ""))
             depts.update(m.get("supporting_departments", []))
 
+        verified = sum(1 for o in obligations if o.get("citation_verified"))
+        unverified = len(obligations) - verified
+
         render_kpi_row([
             {"value": str(len(result.get("raw_updates", []))), "label": "Regulations Scanned"},
             {"value": str(len(obligations)), "label": "Obligations Extracted"},
+            {"value": f"{verified}/{len(obligations)}" if obligations else "0/0",
+             "label": "Citations Verified",
+             "sublabel": f"{unverified} need manual check" if unverified else "all traced to source"},
             {"value": str(critical), "label": "Critical Alerts", "sublabel": f"+ {high} High Priority"},
             {"value": str(len(depts)), "label": "Departments Affected"},
         ])
+
+        render_review_gate()
+        if unverified:
+            st.warning(
+                f"**{unverified} obligation(s) could not be traced to a verbatim quote in the source text.** "
+                "They are shown with a warning badge and downgraded confidence. Verify them against the "
+                "source before entering them into any compliance register."
+            )
 
         # --- Alert Cards ---
         render_section("Regulatory Alerts", "Sorted by severity — critical items require immediate attention")
@@ -120,12 +129,29 @@ if run_button:
                 # Obligations table
                 obs = alert.get("obligations", [])
                 if obs:
-                    render_section("Extracted Obligations")
-                    table_html = '<table class="data-table"><tr><th>ID</th><th>Description</th><th>Deadline</th><th>Category</th></tr>'
+                    render_section("Extracted Obligations", "Each obligation is traced back to the source text")
                     for ob in obs:
-                        table_html += f"<tr><td><code>{ob.get('obligation_id', 'N/A')}</code></td><td>{ob.get('description', 'N/A')[:120]}</td><td>{ob.get('deadline', 'TBD')}</td><td>{ob.get('category', 'N/A')}</td></tr>"
-                    table_html += "</table>"
-                    st.markdown(table_html, unsafe_allow_html=True)
+                        st.markdown(
+                            f"**`{ob.get('obligation_id', 'N/A')}`** &nbsp; {citation_badge(ob)}",
+                            unsafe_allow_html=True,
+                        )
+                        st.markdown(ob.get("description", "N/A"))
+                        oc1, oc2, oc3 = st.columns(3)
+                        with oc1:
+                            st.caption(f"**Deadline**: {ob.get('deadline', 'not stated in source')}")
+                        with oc2:
+                            st.caption(f"**Category**: {ob.get('category', 'N/A')}")
+                        with oc3:
+                            st.caption(f"**Confidence**: {ob.get('confidence', 'N/A')}")
+                        quote = ob.get("source_quote")
+                        if quote:
+                            st.markdown(
+                                f'<div class="source-quote">"{quote}"<br>'
+                                f'<span style="font-style:normal;font-size:0.75rem;color:#64748b;">'
+                                f'&mdash; {ob.get("source_section", "source")}, {ob.get("source_body", "")}</span></div>',
+                                unsafe_allow_html=True,
+                            )
+                        st.markdown("---")
 
         with st.expander("View Raw Agent Output (JSON)"):
             st.json(result)
@@ -136,13 +162,15 @@ if run_button:
 
 else:
     # --- Preview Mode ---
-    render_section("Monitored Regulatory Sources", "12 active regulations across 7 regulatory bodies — click Run Monitor Agent to analyze")
+    render_section(
+        "Monitored Regulatory Sources",
+        f"{len(pack['regulations'])} regulations across {len(pack['regulators'])} regulatory bodies "
+        f"({pack['label']}) \u2014 click Run Monitor Agent to analyze",
+    )
+    render_data_provenance()
 
-    from agents.regulatory_monitor.tools import SAMPLE_REGULATORY_UPDATES
-
-    # Group by source
     sources = {}
-    for u in SAMPLE_REGULATORY_UPDATES:
+    for u in pack["regulations"]:
         sources.setdefault(u["source"], []).append(u)
 
     for source, updates in sources.items():

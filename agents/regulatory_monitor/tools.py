@@ -13,15 +13,18 @@ from core.vectorstore import search_documents, add_documents, COLLECTION_REGULAT
 # In production, these would scrape actual CPUC/FERC/NERC websites
 
 SAMPLE_REGULATORY_UPDATES = [
-    # ==================== CPUC ====================
+    # ==================== OEIS (wildfire-safety regulator; WMPs are filed HERE, not with CPUC) ====
     {
-        "source": "CPUC",
-        "title": "Decision 24-05-079: Updated Wildfire Mitigation Plan Requirements",
-        "url": "https://docs.cpuc.ca.gov/PublishedDocs/Published/G000/M530/K123/530123456.PDF",
+        "source": "OEIS",
+        "title": "2026-2028 Wildfire Mitigation Plan Guidelines: Updated Requirements",
+        "url": "https://energysafety.ca.gov/what-we-do/electrical-infrastructure-safety/wildfire-mitigation-and-safety/wildfire-mitigation-plans/",
         "published_date": "2025-12-15",
-        "text": """The California Public Utilities Commission hereby orders the Company Company
-        and all large electrical corporations to submit updated Wildfire Mitigation Plans (WMPs) incorporating
-        the following new requirements effective January 1, 2026:
+        "text": """The Office of Energy Infrastructure Safety (OEIS) issues these Wildfire Mitigation Plan
+        Guidelines directing PG&E and all large electrical corporations to submit updated Wildfire Mitigation
+        Plans (WMPs) incorporating the following new requirements effective January 1, 2026. WMPs are submitted
+        to and approved by OEIS, which also issues the annual Safety Certification; the CPUC ratifies OEIS's
+        WMP approval. Failure to evidence compliance may affect the Safety Certification and the cost-recovery
+        presumption available under AB 1054 (Pub. Util. Code § 451.1).
 
         1. ENHANCED VEGETATION MANAGEMENT: Utilities must increase vegetation inspection frequency
            from annual to semi-annual for all Tier 3 High Fire Threat Districts (HFTDs).
@@ -39,7 +42,11 @@ SAMPLE_REGULATORY_UPDATES = [
         5. REPORTING: Quarterly compliance reports due within 30 days of quarter end.
            Annual independent audit of WMP implementation required.
 
-        Non-compliance penalties: Up to $100,000 per violation per day under PU Code Section 2107."""
+        Consequences of non-compliance: OEIS may find the WMP non-compliant, may decline to issue or may
+        revoke the annual Safety Certification, and may refer the matter to the CPUC's Safety and Enforcement
+        Division (SED). SED enforcement may impose penalties of up to $100,000 per violation per day under
+        Pub. Util. Code § 2107. Loss of Safety Certification also affects the AB 1054 cost-recovery
+        presumption and Wildfire Fund access."""
     },
     {
         "source": "CPUC",
@@ -107,7 +114,7 @@ SAMPLE_REGULATORY_UPDATES = [
         EV charging infrastructure and time-of-use rate design for EV customers.
 
         REQUIREMENTS:
-        1. INFRASTRUCTURE DEPLOYMENT: the Company shall deploy 5,000 Level 2 and 500 DC Fast Charging
+        1. INFRASTRUCTURE DEPLOYMENT: PG&E shall deploy 5,000 Level 2 and 500 DC Fast Charging
            stations in disadvantaged communities (DACs) by December 2028. At least 40% must be
            in multi-family housing locations.
 
@@ -242,11 +249,11 @@ SAMPLE_REGULATORY_UPDATES = [
            Maximum startup duration reduced from 48 to 24 hours. Cold start exemption eliminated.
 
         4. RESIDUAL RISK: Updated residual risk assessment incorporating latest health data
-           for hydrogen chloride and selenium. the Company facilities using natural gas are largely
+           for hydrogen chloride and selenium. PG&E facilities using natural gas are largely
            exempt but must verify fuel certification annually.
 
         Compliance deadline: 3 years from publication (January 28, 2029).
-        Applicability: the Company has limited direct exposure (gas-fired fleet) but must verify
+        Applicability: PG&E has limited direct exposure (gas-fired fleet) but must verify
         fuel specifications and maintain exemption documentation."""
     },
     # ==================== PHMSA ====================
@@ -355,7 +362,7 @@ def get_regulatory_detail(title: str) -> str:
 
 @tool
 def search_existing_obligations(query: str) -> str:
-    """Search existing the Company obligations in the vector store.
+    """Search existing PG&E obligations in the vector store.
     Args:
         query: Natural language description of the obligation to search for
     """

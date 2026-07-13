@@ -13,37 +13,50 @@ import pandas as pd
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-if "OPENAI_API_KEY" in st.secrets:
-    os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
-if "ANTHROPIC_API_KEY" in st.secrets:
-    os.environ["ANTHROPIC_API_KEY"] = st.secrets["ANTHROPIC_API_KEY"]
 
 st.set_page_config(page_title="Case Analytics | Regulatory Compliance AI", page_icon="🔍", layout="wide")
 
 from core.styles import (inject_styles, render_page_header, render_kpi_row,
                           render_section, render_empty_state, severity_badge, source_badge)
+from core.ui import bootstrap, require_llm, render_data_provenance
 
 inject_styles()
+pack = bootstrap()
 
 render_page_header(
     title="Case Analytics",
-    description="Semantic search and AI analysis over historical enforcement cases, penalties, and regulatory precedents across 7 regulatory bodies",
+    description="Semantic search and AI analysis over historical enforcement cases, penalties and regulatory precedent",
     ai_type="genai"
 )
 
 # --- Data ---
-from agents.case_analytics.chain import SAMPLE_CASES, PENALTY_TIMELINE, get_case_stats, run_case_analytics
+from agents.case_analytics.chain import get_case_stats, run_case_analytics
 
+CASES = pack["cases"]
+PENALTY_TIMELINE = pack["penalty_timeline"]
 stats = get_case_stats()
 
 # --- KPIs ---
+def _money(v: float) -> str:
+    if v >= 1_000_000_000:
+        return f"${v/1e9:.1f}B"
+    if v >= 1_000_000:
+        return f"${v/1e6:.0f}M"
+    return f"${v:,.0f}"
+
+
+_largest = max(CASES, key=lambda c: c["penalty_amount"]) if CASES else None
+
 render_kpi_row([
-    {"value": str(stats["total_cases"]), "label": "Total Cases", "sublabel": "Across 7 regulators"},
-    {"value": f"${stats['total_penalties']/1e9:.1f}B", "label": "Total Penalties"},
-    {"value": f"${stats['average_penalty']/1e6:.0f}M", "label": "Average Penalty"},
-    {"value": f"${stats['max_penalty']/1e9:.1f}B", "label": "Largest Penalty", "sublabel": "Camp Fire 2018"},
+    {"value": str(stats["total_cases"]), "label": "Total Cases",
+     "sublabel": f"Across {len(stats['by_regulator'])} regulators"},
+    {"value": _money(stats["total_penalties"]), "label": "Total Penalties"},
+    {"value": _money(stats["average_penalty"]), "label": "Average Penalty"},
+    {"value": _money(stats["max_penalty"]), "label": "Largest Penalty",
+     "sublabel": _largest["case_number"] if _largest else "-"},
     {"value": str(stats["penalty_cases"]), "label": "Penalty Cases"},
 ])
+render_data_provenance()
 
 # --- Charts ---
 render_section("Penalty Trends & Analytics")
@@ -80,7 +93,7 @@ with col_c1:
     st.plotly_chart(fig_reg, use_container_width=True)
 
 with col_c2:
-    penalty_cases = sorted([c for c in SAMPLE_CASES if c["penalty_amount"] > 0],
+    penalty_cases = sorted([c for c in CASES if c["penalty_amount"] > 0],
                            key=lambda x: x["penalty_amount"], reverse=True)[:10]
     if penalty_cases:
         pdf = pd.DataFrame(penalty_cases)
@@ -118,7 +131,7 @@ with qc1:
         analysis_type = "precedent"
 with qc2:
     if st.button("Cybersecurity risk", use_container_width=True):
-        query = "What is the Company's exposure to NERC CIP cybersecurity enforcement?"
+        query = "What is PG&E's exposure to NERC CIP cybersecurity enforcement?"
         analysis_type = "risk"
 with qc3:
     if st.button("Penalty trends", use_container_width=True):
@@ -130,10 +143,7 @@ with qc4:
         analysis_type = "precedent"
 
 if query:
-    api_key = os.getenv("OPENAI_API_KEY", "")
-    if not api_key:
-        st.error("OPENAI_API_KEY not set. Please configure in Streamlit Cloud Secrets.")
-        st.stop()
+    require_llm()
 
     with st.status(f"Running {analysis_type} analysis...", expanded=True) as status_ui:
         st.write("Searching case database...")
@@ -177,7 +187,7 @@ if query:
 
 # --- Case Browser ---
 st.markdown("---")
-render_section("Case Browser", f"{len(SAMPLE_CASES)} cases across {len(stats['by_regulator'])} regulators")
+render_section("Case Browser", f"{len(CASES)} cases across {len(stats['by_regulator'])} regulators")
 
 # Filters
 fc1, fc2, fc3 = st.columns(3)
@@ -188,7 +198,7 @@ with fc2:
 with fc3:
     filter_penalty = st.selectbox("Filter by Penalty", ["All", "With Penalty", "No Penalty"], key="browse_pen")
 
-filtered = SAMPLE_CASES
+filtered = CASES
 if filter_reg != "All":
     filtered = [c for c in filtered if c["regulator"] == filter_reg]
 if filter_type != "All":
@@ -198,7 +208,7 @@ if filter_penalty == "With Penalty":
 elif filter_penalty == "No Penalty":
     filtered = [c for c in filtered if c["penalty_amount"] == 0]
 
-st.caption(f"Showing {len(filtered)} of {len(SAMPLE_CASES)} cases")
+st.caption(f"Showing {len(filtered)} of {len(CASES)} cases")
 
 for case in filtered:
     penalty_str = f"${case['penalty_amount']:,.0f}" if case['penalty_amount'] > 0 else "—"

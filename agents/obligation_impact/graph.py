@@ -9,7 +9,8 @@ from langgraph.graph import StateGraph, END
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from core.llm import get_openai_primary
-from core.prompts import OBLIGATION_IMPACT_PROMPT
+from core.prompts import get_prompt
+from core.domains import get_domain
 
 
 class ImpactState(TypedDict):
@@ -48,7 +49,7 @@ Return a JSON array:
 ]"""
 
     response = llm.invoke([
-        SystemMessage(content=OBLIGATION_IMPACT_PROMPT),
+        SystemMessage(content=get_prompt("obligation_impact")),
         HumanMessage(content=prompt)
     ])
 
@@ -62,22 +63,17 @@ Return a JSON array:
 
 
 def cross_reference(state: ImpactState) -> ImpactState:
-    """Check for conflicts/overlaps with existing the Company obligations."""
+    """Check for conflicts/overlaps with existing PG&E obligations."""
     llm = get_openai_primary()
 
-    prompt = f"""Analyze these new obligations for potential conflicts or overlaps with
-existing the Company regulatory requirements.
+    domain = get_domain()
+    register = "\n".join(f"- {o}" for o in domain["existing_obligations"])
 
-Known existing obligation areas for the Company:
-- CPUC General Order 95 (overhead line construction)
-- CPUC General Order 165 (inspection cycles)
-- CPUC Wildfire Mitigation Plan (annual filing)
-- FERC Form 714 (transmission planning)
-- NERC CIP-002 through CIP-014 (cybersecurity)
-- CARB MRR (Mandatory Reporting Regulation)
-- Cal-OSHA Title 8 (worker safety)
-- CPUC Rule 20 (underground conversion)
-- PHMSA 49 CFR 192 (gas pipeline safety)
+    prompt = f"""Analyze these new obligations for potential conflicts or overlaps with the
+regulatory requirements already binding on {domain['company']}.
+
+EXISTING OBLIGATION REGISTER:
+{register}
 
 NEW OBLIGATIONS:
 {json.dumps(state['atomic_obligations'], indent=2)}
@@ -95,7 +91,7 @@ For each new obligation, identify:
 ]"""
 
     response = llm.invoke([
-        SystemMessage(content=OBLIGATION_IMPACT_PROMPT),
+        SystemMessage(content=get_prompt("obligation_impact")),
         HumanMessage(content=prompt)
     ])
 
@@ -112,15 +108,13 @@ def score_impacts(state: ImpactState) -> ImpactState:
     """Score each obligation on cost, effort, risk, and timeline dimensions."""
     llm = get_openai_primary()  # GPT-4o for cost-effective scoring
 
-    prompt = f"""Score the impact of each obligation on the Company operations.
-Consider the Company's current financial position, workforce, and regulatory history.
+    domain = get_domain()
 
-the Company Context:
-- Annual revenue: ~$24B
-- Workforce: ~28,000 employees
-- Active wildfire liabilities and safety culture transformation
-- Under enhanced CPUC oversight since 2019
-- Significant ongoing capital investment program (~$7-8B annually)
+    prompt = f"""Score the impact of each obligation on {domain['company']}'s operations.
+Consider its financial position, workforce, and regulatory history.
+
+ENTERPRISE CONTEXT — {domain['company_full']}:
+{domain['enterprise_profile']}
 
 OBLIGATIONS:
 {json.dumps(state['atomic_obligations'], indent=2)}
@@ -163,7 +157,7 @@ Score each obligation:
 ]"""
 
     response = llm.invoke([
-        SystemMessage(content=OBLIGATION_IMPACT_PROMPT),
+        SystemMessage(content=get_prompt("obligation_impact")),
         HumanMessage(content=prompt)
     ])
 
@@ -180,7 +174,7 @@ def generate_impact_report(state: ImpactState) -> ImpactState:
     """Generate executive impact report."""
     llm = get_openai_primary()
 
-    prompt = f"""Generate an executive impact assessment report for the Company leadership.
+    prompt = f"""Generate an executive impact assessment report for PG&E leadership.
 
 REGULATION: {state['regulation_source']}
 
@@ -212,7 +206,7 @@ Produce a JSON report:
 }}"""
 
     response = llm.invoke([
-        SystemMessage(content=OBLIGATION_IMPACT_PROMPT),
+        SystemMessage(content=get_prompt("obligation_impact")),
         HumanMessage(content=prompt)
     ])
 

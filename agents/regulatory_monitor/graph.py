@@ -10,7 +10,8 @@ from langgraph.graph import StateGraph, END
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from core.llm import get_openai_primary
-from core.prompts import REGULATORY_MONITOR_PROMPT
+from core.prompts import get_prompt
+from core.domains import get_domain
 from agents.regulatory_monitor.tools import (
     SAMPLE_REGULATORY_UPDATES,
 )
@@ -30,10 +31,33 @@ class MonitorState(TypedDict):
 
 # --- Graph Nodes ---
 
+def _normalize(text: str) -> str:
+    """Collapse whitespace so a quote can be matched against wrapped source text."""
+    return " ".join(text.split()).lower()
+
+
+def _quote_in_source(quote: str, source_text: str) -> bool:
+    """True only if the model's quote actually appears in the source document.
+
+    Regulatory obligations are only defensible if they trace to real text. A quote the
+    model paraphrased or invented will not match, and the obligation is flagged rather
+    than silently trusted. Matching is whitespace- and case-insensitive; a long quote is
+    accepted if a substantial leading span matches, since models sometimes elide with '...'.
+    """
+    q, src = _normalize(quote), _normalize(source_text)
+    if not q or len(q) < 12:
+        return False
+    if q in src:
+        return True
+    # Tolerate elision: require the first 60 chars of the quote to appear verbatim.
+    head = q[:60]
+    return len(head) >= 40 and head in src
+
+
 def fetch_updates(state: MonitorState) -> MonitorState:
     """Node 1: Fetch regulatory updates from sources."""
     source = state.get("source_filter", "all")
-    updates = SAMPLE_REGULATORY_UPDATES
+    updates = get_domain()["regulations"]
     if source != "all":
         updates = [u for u in updates if u["source"].upper() == source.upper()]
     return {
@@ -68,7 +92,7 @@ Respond in JSON format:
 }}"""
 
         response = llm.invoke([
-            SystemMessage(content=REGULATORY_MONITOR_PROMPT),
+            SystemMessage(content=get_prompt("regulatory_monitor")),
             HumanMessage(content=prompt)
         ])
 
@@ -114,21 +138,29 @@ CLASSIFICATION: {json.dumps(update['classification'])}
 FULL TEXT:
 {update['text']}
 
+PROVENANCE IS MANDATORY. Every obligation must carry a verbatim quote from the source text above.
+If a field is not stated in the source, write "not stated in source" — never estimate a value into it.
+An obligation with no supporting quote must not be emitted.
+
 For each obligation, provide JSON array:
 [
     {{
-        "obligation_id": "unique short ID like CPUC-WMP-001",
+        "obligation_id": "unique short ID like OEIS-WMP-001",
         "description": "What must be done",
         "responsible_entity": "Who must do it",
-        "deadline": "When it must be done",
-        "measurement": "How compliance is measured",
-        "penalty": "Consequence of non-compliance",
-        "category": "wildfire|grid_reliability|cybersecurity|environmental|reporting|safety|ai_governance|financial"
+        "deadline": "When it must be done, or 'not stated in source'",
+        "measurement": "How compliance is measured, or 'not stated in source'",
+        "penalty": "Consequence of non-compliance, or 'not stated in source'",
+        "category": "wildfire|grid_reliability|cybersecurity|environmental|reporting|safety|ai_governance|financial",
+        "source_quote": "VERBATIM sentence(s) copied exactly from the FULL TEXT above that establish this obligation",
+        "source_section": "the numbered section the quote came from, e.g. '1. ENHANCED VEGETATION MANAGEMENT'",
+        "confidence": "high|medium|low — how unambiguously the source establishes this obligation",
+        "inferred": false
     }}
 ]"""
 
         response = llm.invoke([
-            SystemMessage(content=REGULATORY_MONITOR_PROMPT),
+            SystemMessage(content=get_prompt("regulatory_monitor")),
             HumanMessage(content=prompt)
         ])
 
@@ -141,17 +173,28 @@ For each obligation, provide JSON array:
             obligations = [{
                 "obligation_id": f"{update['source']}-PARSE-ERR",
                 "description": "Failed to parse obligations — manual review required",
-                "responsible_entity": "the Company",
-                "deadline": "TBD",
-                "measurement": "TBD",
-                "penalty": "TBD",
-                "category": "unknown"
+                "responsible_entity": "PG&E",
+                "deadline": "not stated in source",
+                "measurement": "not stated in source",
+                "penalty": "not stated in source",
+                "category": "unknown",
+                "source_quote": "",
+                "source_section": "",
+                "confidence": "low",
+                "inferred": True,
             }]
 
         for ob in obligations:
             ob["source_regulation"] = update["title"]
             ob["source_body"] = update["source"]
+            ob["source_url"] = update.get("url", "")
             ob["severity"] = update["classification"]["severity"]
+            # Verify the model actually quoted the source rather than paraphrasing it.
+            # An unverifiable quote is downgraded, never silently accepted.
+            quote = (ob.get("source_quote") or "").strip()
+            ob["citation_verified"] = bool(quote) and _quote_in_source(quote, update["text"])
+            if not ob["citation_verified"]:
+                ob["confidence"] = "low"
 
         all_obligations.extend(obligations)
 
@@ -167,21 +210,14 @@ def map_to_departments(state: MonitorState) -> MonitorState:
     llm = get_openai_primary()
 
     obligations_text = json.dumps(state["extracted_obligations"], indent=2)
+    domain = get_domain()
+    departments = "\n".join(f"- {d}" for d in domain["departments"])
 
-    prompt = f"""Given these extracted regulatory obligations for the Company, map each to the
-appropriate Company department(s) and assess operational impact.
+    prompt = f"""Given these extracted regulatory obligations for {domain['company']}, map each to
+the appropriate department(s) and assess operational impact.
 
-COMPANY DEPARTMENTS:
-- Electric Operations (grid, transmission, distribution)
-- Gas Operations (pipeline, distribution, storage)
-- Wildfire Safety (vegetation mgmt, fire prevention, PSPS)
-- IT/Cybersecurity (NERC CIP, data systems)
-- Environmental & Sustainability (emissions, compliance)
-- Regulatory Affairs (filings, rate cases)
-- Legal & Compliance (enforcement, litigation)
-- Customer Operations (billing, service, data privacy)
-- Generation (power plants, procurement)
-- Corporate (finance, governance, reporting)
+DEPARTMENTS:
+{departments}
 
 OBLIGATIONS:
 {obligations_text}
@@ -201,7 +237,7 @@ For each obligation, provide a JSON array:
 ]"""
 
     response = llm.invoke([
-        SystemMessage(content=REGULATORY_MONITOR_PROMPT),
+        SystemMessage(content=get_prompt("regulatory_monitor")),
         HumanMessage(content=prompt)
     ])
 

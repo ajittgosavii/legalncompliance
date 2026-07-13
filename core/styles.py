@@ -440,6 +440,35 @@ ENTERPRISE_CSS = """
     div[data-testid="stSidebar"] h1, div[data-testid="stSidebar"] h2, div[data-testid="stSidebar"] h3 {
         color: white !important;
     }
+
+    /* --- Provenance badges: a verified citation must never look like an unverified one --- */
+    .badge {
+        display: inline-block;
+        padding: 0.15rem 0.55rem;
+        border-radius: 4px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+    }
+    .badge-verified {
+        background: #dcfce7;
+        color: #166534;
+        border: 1px solid #86efac;
+    }
+    .badge-unverified {
+        background: #fef3c7;
+        color: #92400e;
+        border: 1px solid #fcd34d;
+    }
+    .source-quote {
+        border-left: 3px solid #94a3b8;
+        background: #f8fafc;
+        padding: 0.5rem 0.75rem;
+        margin: 0.4rem 0;
+        font-size: 0.85rem;
+        color: #334155;
+        font-style: italic;
+    }
 </style>
 """
 

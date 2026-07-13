@@ -9,18 +9,15 @@ from langgraph.graph import StateGraph, END
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from core.llm import get_openai_primary
-from core.prompts import (
-    AUDIT_SUPERVISOR_PROMPT,
-    AUDIT_EVIDENCE_PROMPT,
-    AUDIT_GAP_PROMPT,
-    AUDIT_RESPONSE_PROMPT,
-)
+from core.prompts import get_prompt
+from core.domains import get_domain
 
 
 class AuditState(TypedDict):
     audit_scope: str
     regulations: list[str]
     obligations: list[dict]
+    audit_plan: dict
     evidence_inventory: list[dict]
     gap_analysis: list[dict]
     draft_responses: list[dict]
@@ -30,11 +27,11 @@ class AuditState(TypedDict):
     iteration: int
 
 
-# --- Simulated Evidence Repository (35+ documents across 8 categories) ---
+# --- Simulated Evidence Repository (48 documents across 8 categories) ---
 SAMPLE_EVIDENCE = {
     "wildfire": [
         {"doc_id": "WMP-2025", "title": "2025 Wildfire Mitigation Plan", "type": "plan", "status": "current", "location": "SharePoint/Compliance/WMP/", "last_updated": "2025-03-15", "owner": "Wildfire Safety"},
-        {"doc_id": "WMP-2026-DRAFT", "title": "2026 WMP Draft — For CPUC Review", "type": "plan", "status": "draft", "location": "SharePoint/Compliance/WMP/2026/", "last_updated": "2026-01-20", "owner": "Wildfire Safety"},
+        {"doc_id": "WMP-2026-DRAFT", "title": "2026 WMP Draft — For OEIS Review", "type": "plan", "status": "draft", "location": "SharePoint/Compliance/WMP/2026/", "last_updated": "2026-01-20", "owner": "Wildfire Safety"},
         {"doc_id": "VEG-RPT-Q4", "title": "Q4 2025 Vegetation Management Report", "type": "report", "status": "current", "location": "SharePoint/Compliance/Vegetation/", "last_updated": "2026-01-10", "owner": "Vegetation Mgmt"},
         {"doc_id": "VEG-RPT-Q1-2026", "title": "Q1 2026 Vegetation Management Report", "type": "report", "status": "current", "location": "SharePoint/Compliance/Vegetation/", "last_updated": "2026-04-08", "owner": "Vegetation Mgmt"},
         {"doc_id": "VEG-INSPECT-TRACKER", "title": "Tier 3 HFTD Vegetation Inspection Tracker", "type": "tracker", "status": "current", "location": "SharePoint/Compliance/Vegetation/Inspections/", "last_updated": "2026-04-01", "owner": "Vegetation Mgmt"},
@@ -99,6 +96,65 @@ SAMPLE_EVIDENCE = {
 }
 
 
+# --- Audit types + the obligations each one tests (Energy & Utilities pack) ---
+# Other industry packs supply their own via core/domains.py -> pack["audit_types"].
+ENERGY_AUDIT_TYPES = {
+    "OEIS Wildfire Mitigation Plan Audit": [
+        {"id": "WF-001", "text": "Semi-annual vegetation inspection in Tier 3 HFTDs", "category": "vegetation", "deadline": "2026-06-30"},
+        {"id": "WF-002", "text": "Underground 300 circuit-miles in HFTDs", "category": "grid_hardening", "deadline": "2027-12-31"},
+        {"id": "WF-003", "text": "50% reduction in PSPS events vs 2024 baseline", "category": "psps", "deadline": "2026-12-31"},
+        {"id": "WF-004", "text": "Deploy HD cameras at 100% of Tier 3 transmission structures", "category": "monitoring", "deadline": "2026-06-30"},
+        {"id": "WF-005", "text": "Quarterly compliance reports within 30 days", "category": "reporting", "deadline": "Ongoing"},
+        {"id": "WF-006", "text": "Covered conductor on all new Tier 2/3 construction", "category": "grid_hardening", "deadline": "2026-01-01"},
+        {"id": "WF-007", "text": "Sectionalizing devices on critical facility circuits", "category": "grid_hardening", "deadline": "2026-12-31"},
+        {"id": "WF-008", "text": "AI-powered fire detection system deployment", "category": "technology", "deadline": "2026-06-30"},
+    ],
+    "NERC CIP Cybersecurity Audit": [
+        {"id": "CIP-001", "text": "Network security monitoring for high/medium BES Cyber Systems", "category": "monitoring", "deadline": "2027-10-01"},
+        {"id": "CIP-002", "text": "90-day network data retention", "category": "data_retention", "deadline": "2027-10-01"},
+        {"id": "CIP-003", "text": "Quarterly anomaly detection baseline updates", "category": "detection", "deadline": "Ongoing"},
+        {"id": "CIP-004", "text": "95% ESP network traffic monitoring coverage", "category": "coverage", "deadline": "2027-10-01"},
+        {"id": "CIP-005", "text": "Critical security patches within 35 days", "category": "patch_management", "deadline": "Ongoing"},
+        {"id": "CIP-006", "text": "Physical Security Perimeter access controls", "category": "physical_security", "deadline": "Ongoing"},
+        {"id": "CIP-007", "text": "Annual CIP security training completion", "category": "training", "deadline": "2026-12-31"},
+        {"id": "CIP-008", "text": "Low-impact BES electronic access controls", "category": "access_control", "deadline": "2026-06-30"},
+    ],
+    "CARB Emissions Compliance Audit": [
+        {"id": "EM-001", "text": "Monthly GHG emissions reporting", "category": "reporting", "deadline": "2026-07-01"},
+        {"id": "EM-002", "text": "Methane leak detection protocol", "category": "monitoring", "deadline": "2026-07-01"},
+        {"id": "EM-003", "text": "Allowance proceeds ratepayer benefit", "category": "financial", "deadline": "2026-12-31"},
+        {"id": "EM-004", "text": "SF6 switchgear emissions tracking", "category": "reporting", "deadline": "Ongoing"},
+        {"id": "EM-005", "text": "EPA Subpart W annual reporting", "category": "reporting", "deadline": "2026-03-31"},
+    ],
+    "FERC Transmission Planning Review": [
+        {"id": "TP-001", "text": "Model 3+ extreme weather scenarios", "category": "planning", "deadline": "2026-06-30"},
+        {"id": "TP-002", "text": "Weather-correlated N-1-1 contingency analysis", "category": "reliability", "deadline": "2026-06-30"},
+        {"id": "TP-003", "text": "Updated planning criteria filing (Order 901)", "category": "filing", "deadline": "2026-05-20"},
+        {"id": "TP-004", "text": "Regional weather assumption coordination", "category": "coordination", "deadline": "2026-06-30"},
+    ],
+    "PHMSA Pipeline Safety Audit": [
+        {"id": "PS-001", "text": "Advanced leak detection (100% system coverage)", "category": "monitoring", "deadline": "2028-01-01"},
+        {"id": "PS-002", "text": "Grade 2 leak repair within 6 months", "category": "maintenance", "deadline": "2026-07-01"},
+        {"id": "PS-003", "text": "Quarterly methane emissions reports", "category": "reporting", "deadline": "2027-03-31"},
+        {"id": "PS-004", "text": "5% annual legacy pipe replacement", "category": "infrastructure", "deadline": "Ongoing"},
+        {"id": "PS-005", "text": "GPS-enabled locates, 1-hour emergency response", "category": "operations", "deadline": "2026-12-31"},
+    ],
+    "Cal-OSHA Worker Safety Audit": [
+        {"id": "WS-001", "text": "Heat illness plan — 87°F threshold", "category": "heat_safety", "deadline": "2026-04-01"},
+        {"id": "WS-002", "text": "Smoke protection — N95 when AQI >151", "category": "smoke_safety", "deadline": "2026-04-01"},
+        {"id": "WS-003", "text": "Contractor safety quarterly verification", "category": "contractor", "deadline": "Ongoing"},
+        {"id": "WS-004", "text": "Safety training in primary language", "category": "training", "deadline": "2026-12-31"},
+        {"id": "WS-005", "text": "Lockout/tagout compliance", "category": "electrical_safety", "deadline": "Ongoing"},
+    ],
+    "Customer Data Privacy Audit": [
+        {"id": "DP-001", "text": "AMI data explicit opt-in consent", "category": "consent", "deadline": "2026-07-01"},
+        {"id": "DP-002", "text": "72-hour breach notification", "category": "breach", "deadline": "2026-07-01"},
+        {"id": "DP-003", "text": "Green Button Connect My Data API", "category": "data_access", "deadline": "2026-07-01"},
+        {"id": "DP-004", "text": "AI data anonymization (k>=5)", "category": "ai_privacy", "deadline": "2026-07-01"},
+    ],
+}
+
+
 def plan_audit(state: AuditState) -> AuditState:
     """Supervisor: Plan the audit preparation approach."""
     llm = get_openai_primary()
@@ -121,25 +177,43 @@ Create an audit preparation plan as JSON:
 }}"""
 
     response = llm.invoke([
-        SystemMessage(content=AUDIT_SUPERVISOR_PROMPT),
+        SystemMessage(content=get_prompt("audit_supervisor")),
         HumanMessage(content=prompt)
     ])
 
-    return {**state, "current_step": "collect_evidence"}
+    try:
+        content = response.content
+        plan = json.loads(content[content.find("{"):content.rfind("}") + 1])
+    except (json.JSONDecodeError, ValueError):
+        plan = {
+            "audit_areas": [],
+            "evidence_needed_per_area": {},
+            "priority_order": [],
+            "estimated_preparation_effort": "unknown",
+            "key_risks": [],
+            "parse_error": "Supervisor plan could not be parsed as JSON",
+        }
+
+    return {**state, "audit_plan": plan, "current_step": "collect_evidence"}
 
 
 def collect_evidence(state: AuditState) -> AuditState:
     """Evidence Collector: Gather and validate evidence for each obligation."""
     llm = get_openai_primary()
 
-    # Combine all available evidence
+    # Evidence repository for the ACTIVE industry domain pack
     all_evidence = []
-    for category, docs in SAMPLE_EVIDENCE.items():
+    for category, docs in get_domain()["evidence"].items():
         for doc in docs:
-            doc["category"] = category
-            all_evidence.append(doc)
+            all_evidence.append({**doc, "category": category})
 
     prompt = f"""As the Evidence Collector, map available evidence to each obligation.
+
+The Supervisor has produced this audit plan. Work to it — cover every audit area it identifies,
+and prioritise in the order it sets.
+
+SUPERVISOR'S AUDIT PLAN:
+{json.dumps(state.get('audit_plan', {}), indent=2)}
 
 OBLIGATIONS:
 {json.dumps(state['obligations'], indent=2)}
@@ -167,7 +241,7 @@ For each obligation, assess evidence coverage:
 ]"""
 
     response = llm.invoke([
-        SystemMessage(content=AUDIT_EVIDENCE_PROMPT),
+        SystemMessage(content=get_prompt("audit_evidence")),
         HumanMessage(content=prompt)
     ])
 
@@ -185,6 +259,9 @@ def analyze_gaps(state: AuditState) -> AuditState:
     llm = get_openai_primary()
 
     prompt = f"""As the Gap Analyzer, identify compliance gaps based on evidence assessment.
+
+The Supervisor flagged these key risks to watch for — check each one explicitly:
+{json.dumps(state.get('audit_plan', {}).get('key_risks', []), indent=2)}
 
 OBLIGATIONS:
 {json.dumps(state['obligations'], indent=2)}
@@ -212,7 +289,7 @@ For each gap found:
 ]"""
 
     response = llm.invoke([
-        SystemMessage(content=AUDIT_GAP_PROMPT),
+        SystemMessage(content=get_prompt("audit_gap")),
         HumanMessage(content=prompt)
     ])
 
@@ -230,6 +307,10 @@ def draft_responses(state: AuditState) -> AuditState:
     llm = get_openai_primary()
 
     prompt = f"""As the Response Drafter, prepare professional audit responses.
+
+Draft one response per audit area identified in the Supervisor's plan.
+
+SUPERVISOR'S AUDIT AREAS: {json.dumps(state.get('audit_plan', {}).get('audit_areas', []), indent=2)}
 
 AUDIT SCOPE: {state['audit_scope']}
 OBLIGATIONS: {json.dumps(state['obligations'], indent=2)}
@@ -256,7 +337,7 @@ Draft responses for each audit area:
 ]"""
 
     response = llm.invoke([
-        SystemMessage(content=AUDIT_RESPONSE_PROMPT),
+        SystemMessage(content=get_prompt("audit_response")),
         HumanMessage(content=prompt)
     ])
 
@@ -275,6 +356,12 @@ def supervisor_review(state: AuditState) -> AuditState:
 
     prompt = f"""As the Audit Supervisor, review the complete audit preparation package.
 
+This was YOUR plan. Assess whether the specialist agents actually covered it — call out any audit
+area or key risk from the plan that the evidence, gaps or responses failed to address.
+
+YOUR ORIGINAL PLAN:
+{json.dumps(state.get('audit_plan', {}), indent=2)}
+
 EVIDENCE COLLECTED: {len(state['evidence_inventory'])} items
 GAPS IDENTIFIED: {len(state['gap_analysis'])} gaps
 RESPONSES DRAFTED: {len(state['draft_responses'])} areas
@@ -289,14 +376,14 @@ Provide supervisor assessment:
     "readiness_score": 0-100,
     "executive_summary": "2-3 paragraph summary for audit committee",
     "critical_items": ["items requiring immediate executive attention"],
-    "strengths": ["areas where the Company is well-prepared"],
+    "strengths": ["areas where PG&E is well-prepared"],
     "weaknesses": ["areas of concern"],
     "recommendations": ["prioritized list of actions before audit"],
-    "timeline_assessment": "whether the Company can be ready by audit date"
+    "timeline_assessment": "whether PG&E can be ready by audit date"
 }}"""
 
     response = llm.invoke([
-        SystemMessage(content=AUDIT_SUPERVISOR_PROMPT),
+        SystemMessage(content=get_prompt("audit_supervisor")),
         HumanMessage(content=prompt)
     ])
 
@@ -308,10 +395,17 @@ Provide supervisor assessment:
 
     final_package = {
         "audit_scope": state["audit_scope"],
+        "audit_plan": state.get("audit_plan", {}),
         "evidence_inventory": state["evidence_inventory"],
         "gap_analysis": state["gap_analysis"],
         "draft_responses": state["draft_responses"],
         "supervisor_review": review,
+        "review_status": "PENDING_HUMAN_REVIEW",
+        "disclaimer": (
+            "AI-generated decision support. Not a compliance determination. Every obligation, gap and "
+            "drafted response requires review and sign-off by qualified personnel before use, and no "
+            "content may be submitted to a regulator without that sign-off."
+        ),
     }
 
     return {**state, "supervisor_review": review, "final_package": final_package, "current_step": "complete"}
@@ -349,6 +443,7 @@ def run_audit_preparation(
         "audit_scope": audit_scope,
         "regulations": regulations,
         "obligations": obligations,
+        "audit_plan": {},
         "evidence_inventory": [],
         "gap_analysis": [],
         "draft_responses": [],

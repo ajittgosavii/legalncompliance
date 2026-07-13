@@ -1,6 +1,9 @@
 """
-Regulatory Compliance AI Platform
-Main Dashboard
+Regulatory Compliance AI Platform — Main Dashboard
+
+One agentic architecture, many regulated industries. Switch the industry pack in the
+sidebar and all seven agents re-target: regulators, departments, obligation register,
+evidence repository and enforcement history all swap. No agent code changes.
 """
 
 import streamlit as st
@@ -8,12 +11,6 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
-# Load API keys from Streamlit secrets
-if "OPENAI_API_KEY" in st.secrets:
-    os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
-if "ANTHROPIC_API_KEY" in st.secrets:
-    os.environ["ANTHROPIC_API_KEY"] = st.secrets["ANTHROPIC_API_KEY"]
 
 st.set_page_config(
     page_title="Regulatory Compliance AI",
@@ -23,72 +20,78 @@ st.set_page_config(
 )
 
 from core.styles import inject_styles, render_hero, render_kpi_row, render_section
+from core.ui import bootstrap, render_data_provenance
 
 inject_styles()
+pack = bootstrap()
 
-# --- Sidebar ---
-with st.sidebar:
-    st.markdown("### Navigation")
-    st.page_link("app.py", label="Dashboard", icon="🏠")
-    st.page_link("pages/1_Regulatory_Monitor.py", label="Regulatory Monitor", icon="📡")
-    st.page_link("pages/2_Obligation_Impact.py", label="Obligation Impact", icon="📊")
-    st.page_link("pages/3_Audit_Prep.py", label="Audit Preparation", icon="📋")
-    st.page_link("pages/4_Case_Analytics.py", label="Case Analytics", icon="🔍")
-    st.markdown("---")
-    st.markdown("##### Platform Info")
-    st.markdown("""
-    - **LLM**: OpenAI GPT-4o
-    - **Framework**: LangGraph
-    - **Search**: TF-IDF In-Memory
-    - **Agents**: 7 Specialized
-    """)
-    api_status = "Connected" if os.getenv("OPENAI_API_KEY") else "Not Configured"
-    api_color = "🟢" if os.getenv("OPENAI_API_KEY") else "🔴"
-    st.markdown(f"**API Status**: {api_color} {api_status}")
+# --- Everything below is computed from the ACTIVE domain pack. No hard-coded counts. ---
+regulators = pack["regulators"]
+regulations = pack["regulations"]
+cases = pack["cases"]
+evidence_docs = sum(len(v) for v in pack["evidence"].values())
+audit_types = pack["audit_types"]
+total_penalties = sum(c["penalty_amount"] for c in cases)
 
-# --- Hero Banner ---
+
+def _fmt_money(v: float) -> str:
+    if v >= 1_000_000_000:
+        return f"${v / 1_000_000_000:.1f}B"
+    if v >= 1_000_000:
+        return f"${v / 1_000_000:.0f}M"
+    return f"${v:,.0f}"
+
+
 render_hero(
     title="Regulatory Compliance AI Platform",
-    subtitle="Agentic AI and Generative AI for Regulatory Change Monitoring, Obligation Analysis, Audit Preparation, and Case Analytics",
-    tech_text="OpenAI GPT-4o  ·  LangGraph Agentic Framework  ·  RAG-Enhanced Analytics"
+    subtitle=(
+        "Agentic AI for regulatory change monitoring, obligation analysis, audit preparation "
+        f"and enforcement analytics — currently configured for {pack['label']}"
+    ),
+    tech_text="OpenAI GPT-4o  ·  LangGraph Agentic Framework  ·  RAG-Enhanced Analytics",
 )
 
-# --- KPI Row ---
 render_kpi_row([
-    {"value": "7", "label": "Regulatory Bodies", "sublabel": "CPUC · FERC · NERC · CARB · EPA · PHMSA · Cal-OSHA"},
+    {"value": str(len(regulators)), "label": "Regulatory Bodies",
+     "sublabel": " · ".join(r["code"] for r in regulators)},
     {"value": "4", "label": "AI Modules", "sublabel": "3 Agentic + 1 Generative AI"},
     {"value": "7", "label": "Specialized Agents", "sublabel": "LangGraph State Machines"},
-    {"value": "12", "label": "Active Regulations", "sublabel": "Monitored in Real-Time"},
-    {"value": "28", "label": "Case Records", "sublabel": "$19.8B Total Penalty History"},
+    {"value": str(len(regulations)), "label": "Regulations Monitored",
+     "sublabel": f"{len(audit_types)} audit types · {evidence_docs} evidence docs"},
+    {"value": str(len(cases)), "label": "Case Records",
+     "sublabel": f"{_fmt_money(total_penalties)} total penalty history"},
 ])
 
-# --- Overview / What this tool does ---
-render_section("Overview", "What this platform does and why it is useful")
+# --- Overview ---
+render_section("Overview", "What this platform does and why it matters")
 
-st.markdown("""
+st.markdown(f"""
 <div class="module-card" style="border-left: 4px solid #f97316;">
     <div class="module-desc" style="font-size: 1.02rem; line-height: 1.6;">
         <strong>Regulatory Compliance AI</strong> turns the slow, manual work of staying compliant
-        into an automated, AI-assisted workflow. It continuously watches federal and state regulators,
-        breaks new rules down into concrete, testable obligations, scores their business impact,
-        assembles audit-ready evidence, and mines decades of enforcement history for precedent — so
-        compliance, legal, and operations teams can shift from <em>reacting</em> to regulatory change
-        to <em>getting ahead</em> of it.
+        into an automated, AI-assisted workflow. It watches the regulators, breaks new rules down into
+        concrete, testable obligations with a verifiable citation back to the source text, scores their
+        business impact, assembles audit-ready evidence packages with gap analysis, and mines enforcement
+        history for precedent — so compliance, legal and operations teams shift from <em>reacting</em> to
+        regulatory change to <em>getting ahead</em> of it.
+        <br><br>
+        The commercial insight: <strong>evidence quality is a financial lever, not administrative
+        overhead.</strong> {pack['financial_hook']}
     </div>
 </div>
 """, unsafe_allow_html=True)
 
 ov1, ov2, ov3 = st.columns(3)
 with ov1:
-    st.markdown("""
+    st.markdown(f"""
     <div class="module-card agentic">
         <div class="module-title" style="font-size: 1.1rem;">What it does</div>
         <div class="module-desc">
-            • Monitors 7 regulators (CPUC, FERC, NERC, CARB, EPA, PHMSA, Cal-OSHA)<br>
-            • Extracts specific obligations, deadlines &amp; penalties from dense rule text<br>
+            • Monitors {len(regulators)} regulators ({", ".join(r["code"] for r in regulators[:4])}…)<br>
+            • Extracts obligations, deadlines &amp; penalties — each with a verified source quote<br>
             • Scores cost, operational, timeline &amp; penalty-risk impact<br>
-            • Builds audit-ready packages with evidence &amp; gap analysis<br>
-            • Searches 28 enforcement cases for precedent and trends
+            • Builds audit packages with evidence mapping &amp; gap analysis<br>
+            • Searches {len(cases)} enforcement cases for precedent and trends
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -101,7 +104,7 @@ with ov2:
             • Legal counsel and risk management<br>
             • Internal audit and controls<br>
             • Operations leaders in regulated industries<br>
-            • Any organization that must track and respond to evolving regulation
+            • Any organisation that must evidence compliance on demand
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -111,49 +114,73 @@ with ov3:
         <div class="module-title" style="font-size: 1.1rem;">Why it is useful</div>
         <div class="module-desc">
             • Cuts hours of manual rule-reading to minutes<br>
-            • Surfaces new obligations &amp; deadlines early<br>
-            • Reduces penalty exposure and audit surprises<br>
+            • Finds evidence gaps <em>before</em> the auditor does<br>
+            • Protects cost recovery by making compliance provable<br>
             • Grounds decisions in real enforcement precedent<br>
-            • Gives leadership a clear, prioritized view of risk
+            • Gives leadership a prioritised view of exposure
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-st.caption(
-    "How it works: a LangGraph agentic pipeline with OpenAI GPT-4o (Claude fallback) and "
-    "RAG over an enforcement-case knowledge base. Sample data is provided for demonstration."
-)
+# --- Cross-industry ---
+render_section("One Architecture, Many Industries", "The agents are domain-agnostic — the domain is a swappable pack")
 
-# --- Module Cards ---
-render_section("AI Modules", "Select a module from the sidebar or click below to begin")
+st.markdown("""
+The four workflows contain no industry-specific logic. Everything that makes this "a utility compliance
+tool" or "a retail compliance tool" lives in a **domain pack**: the regulators, the departments obligations
+route to, the existing-obligation register used for conflict detection, the enterprise profile used for
+impact scoring, and the corpora. Switch the pack in the sidebar and all seven agents re-target.
+""")
+
+from core.domains import DOMAIN_PACKS
+
+cols = st.columns(len(DOMAIN_PACKS))
+for col, (key, p) in zip(cols, DOMAIN_PACKS.items()):
+    active = key == pack["key"]
+    with col:
+        st.markdown(f"""
+        <div class="module-card {'agentic' if active else ''}"
+             style="{'border-left: 4px solid #f97316;' if active else 'opacity: 0.75;'}">
+            <div class="module-number">{p['vertical']}</div>
+            <div class="module-title" style="font-size: 1.0rem;">{p['label']}</div>
+            <div class="module-desc" style="font-size: 0.85rem;">
+                {p['tagline']}<br><br>
+                <strong>{len(p['regulators'])}</strong> regulators
+                {'&nbsp;·&nbsp;<strong>ACTIVE</strong>' if active else ''}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+# --- Modules ---
+render_section("AI Modules", "Select a module from the sidebar or open one below")
 
 col1, col2 = st.columns(2)
 
 with col1:
-    st.markdown("""
+    st.markdown(f"""
     <div class="module-card agentic">
         <div class="module-number">Module 01</div>
         <div class="module-title">Regulatory Change Monitor</div>
         <div class="module-desc">
-            Continuously monitors CPUC, FERC, NERC, CARB, EPA, PHMSA, and Cal-OSHA for regulatory
-            changes. Multi-step agentic pipeline automatically classifies changes, extracts obligations,
-            maps to departments, and generates prioritized alerts.
+            Monitors {", ".join(r["code"] for r in regulators)} for regulatory change. A five-node agentic
+            pipeline classifies each change, extracts obligations <em>with a verified verbatim citation to the
+            source text</em>, maps them to departments, and generates prioritised alerts.
         </div>
-        <div class="module-tech">5-Node LangGraph Pipeline · GPT-4o · 12 Sample Regulations</div>
+        <div class="module-tech">5-Node LangGraph Pipeline · GPT-4o · {len(regulations)} Regulations · Citation-verified</div>
     </div>
     """, unsafe_allow_html=True)
     st.page_link("pages/1_Regulatory_Monitor.py", label="Open Regulatory Monitor →", icon="📡")
 
-    st.markdown("""
+    st.markdown(f"""
     <div class="module-card agentic" style="margin-top: 1rem;">
         <div class="module-number">Module 03</div>
-        <div class="module-title">Audit Analysis & Preparation</div>
+        <div class="module-title">Audit Analysis &amp; Preparation</div>
         <div class="module-desc">
-            Multi-agent system with Supervisor coordinating Evidence Collector, Gap Analyzer,
-            and Response Drafter. Produces audit-ready packages with evidence mapping, gap
-            identification, and professional regulatory responses.
+            The flagship. A Supervisor plans the audit, then Evidence Collector, Gap Analyzer and Response
+            Drafter work to that plan. Produces a traceable chain — regulation → obligation → evidence → gap →
+            owner &amp; date → drafted response — ending in a 0–100 readiness score.
         </div>
-        <div class="module-tech">Supervisor + 3 Sub-Agents · 7 Audit Types · 45+ Evidence Documents</div>
+        <div class="module-tech">Supervisor + 3 Sub-Agents · {len(audit_types)} Audit Types · {evidence_docs} Evidence Documents</div>
     </div>
     """, unsafe_allow_html=True)
     st.page_link("pages/3_Audit_Prep.py", label="Open Audit Preparation →", icon="📋")
@@ -164,233 +191,207 @@ with col2:
         <div class="module-number">Module 02</div>
         <div class="module-title">Obligation Impact Analysis</div>
         <div class="module-desc">
-            Decomposes complex regulations into atomic, testable obligations. Cross-references
-            against existing requirements, scores multi-dimensional impact (cost, operations,
-            timeline, penalty risk), and generates executive reports.
+            Decomposes a regulation into atomic, testable obligations. Cross-references them against the
+            existing obligation estate to find conflicts and overlaps, scores four impact dimensions
+            (cost, operations, timeline, penalty risk), and writes an executive report.
         </div>
         <div class="module-tech">4-Node Impact Graph · GPT-4o · Multi-Dimensional Scoring</div>
     </div>
     """, unsafe_allow_html=True)
     st.page_link("pages/2_Obligation_Impact.py", label="Open Obligation Impact →", icon="📊")
 
-    st.markdown("""
+    st.markdown(f"""
     <div class="module-card genai" style="margin-top: 1rem;">
         <div class="module-number">Module 04</div>
         <div class="module-title">Case Analytics</div>
         <div class="module-desc">
-            RAG-powered analysis of historical enforcement cases across 7 regulators.
-            Semantic precedent search, penalty trend analysis, risk assessment, and
-            interactive visualizations with 28 case records totaling $19.8B in penalties.
+            RAG-powered analysis of enforcement history. Semantic precedent search, penalty trend analysis,
+            risk assessment and interactive charts across {len(cases)} cases totalling
+            {_fmt_money(total_penalties)} in penalties.
         </div>
-        <div class="module-tech">RAG + GPT-4o · 28 Cases · 7 Regulators · Plotly Dashboards</div>
+        <div class="module-tech">RAG + GPT-4o · {len(cases)} Cases · Plotly Dashboards · No LLM needed to browse</div>
     </div>
     """, unsafe_allow_html=True)
     st.page_link("pages/4_Case_Analytics.py", label="Open Case Analytics →", icon="🔍")
 
-# --- Recommended Start ---
+# --- Start here ---
 st.markdown("")
-rec1, rec2 = st.columns([1, 1])
+rec1, rec2 = st.columns(2)
 with rec1:
-    st.success("""
+    st.success(f"""
     **Recommended: Start Here**
 
-    New to the platform? Begin with **Case Analytics** — it loads instantly with
-    interactive charts and 28 pre-loaded cases. No AI agent execution required.
+    New to the platform? Open **Case Analytics** — it loads instantly with {len(cases)} pre-loaded
+    cases and interactive charts. No AI agent execution required.
     """)
     st.page_link("pages/4_Case_Analytics.py", label="Open Case Analytics →", icon="🔍")
 with rec2:
-    st.info("""
+    st.info(f"""
     **Ready to Run AI Agents?**
 
-    Try the **Regulatory Monitor** — click one button to watch the 5-step agentic
-    pipeline classify 12 regulations, extract obligations, and generate prioritized alerts.
+    Try the **Regulatory Monitor** — one click runs the 5-step agentic pipeline over
+    {len(regulations)} regulations, extracting citation-verified obligations.
     """)
     st.page_link("pages/1_Regulatory_Monitor.py", label="Open Regulatory Monitor →", icon="📡")
 
-# --- Getting Started Guide ---
-render_section("Getting Started", "Follow these steps to begin using the platform")
+# --- Guide ---
+render_section("Getting Started", "How to use the platform")
 
-tab_start, tab_workflows, tab_arch = st.tabs(["Quick Start Guide", "Module Workflows", "Architecture & Tech Stack"])
+tab_start, tab_workflows, tab_arch, tab_trust = st.tabs(
+    ["Quick Start", "Module Workflows", "Architecture", "Trust & Limitations"]
+)
 
 with tab_start:
-    st.markdown("""
-    ### Step 1: Explore the Case Analytics Dashboard (No AI needed)
-
-    The **Case Analytics** module loads instantly with **28 pre-loaded enforcement cases**
-    across 7 regulators. You can explore interactive charts, browse cases, and filter by
-    regulator, type, and penalty — all without running any AI agents.
-
-    **Try it now:** Click **Case Analytics** in the sidebar.
+    st.markdown(f"""
+    ### Step 0: Pick your industry
+    Use the **Industry** switcher in the sidebar. The platform is currently configured for
+    **{pack['label']}** — {pack['company_full']}. Switching re-targets all seven agents.
 
     ---
 
-    ### Step 2: Run Your First AI Agent — Regulatory Monitor
-
-    This is the best place to start with AI-powered analysis:
-
-    1. Navigate to **Regulatory Monitor** in the sidebar
-    2. Select a regulator from the dropdown (or leave as "All")
-    3. Click **"Run Monitor Agent"**
-    4. Watch the 5-step agentic pipeline process 12 regulations in real time
-    5. Review the generated alerts sorted by severity — each includes extracted obligations,
-       affected departments, deadlines, and penalty risks
-
-    **What happens behind the scenes:** The AI agent reads each regulation, classifies the
-    change type and severity, extracts specific compliance obligations, maps them to your
-    departments, and generates prioritized alerts.
+    ### Step 1: Explore Case Analytics (no AI needed)
+    {len(cases)} pre-loaded enforcement cases with interactive charts and filters. Nothing to run.
 
     ---
 
-    ### Step 3: Deep-Dive with Obligation Impact Analysis
-
-    Once you've seen the regulatory alerts, pick any specific regulation for deep analysis:
-
-    1. Navigate to **Obligation Impact** in the sidebar
-    2. Select a regulation from the dropdown
-    3. Click **"Run Impact Analysis"**
-    4. Review the executive report with cost estimates, deadlines, and recommended actions
-    5. Explore each decomposed obligation with multi-dimensional impact scores
+    ### Step 2: Run your first agent — Regulatory Monitor
+    1. Open **Regulatory Monitor**
+    2. Pick a regulator (or leave "all")
+    3. Click **Run Monitor Agent**
+    4. Watch the 5-step pipeline classify, extract, map and alert
+    5. Check the **citation badge** on each obligation — the platform verifies that the quote the model
+       gave actually appears in the source text. An obligation it cannot verify is flagged, not hidden.
 
     ---
 
-    ### Step 4: Prepare for an Audit
-
-    The most powerful module — a team of 4 AI agents working together:
-
-    1. Navigate to **Audit Preparation** in the sidebar
-    2. Choose an audit type (e.g., "CPUC Wildfire Safety Audit")
-    3. Select the regulations in scope
-    4. Click **"Run Audit Prep Agent"**
-    5. Review the Supervisor's readiness score, evidence inventory, gap analysis, and draft responses
+    ### Step 3: Deep-dive with Obligation Impact
+    Pick one regulation, run the impact analysis, and read the executive report: cost range, earliest
+    deadline, conflicts with existing obligations, and recommended actions with owners.
 
     ---
 
-    ### Step 5: Ask Questions in Case Analytics
+    ### Step 4: Prepare for an audit — the flagship
+    1. Open **Audit Preparation**
+    2. Choose an audit type and the regulations in scope
+    3. Click **Run Audit Prep Agent**
+    4. Read the readiness score, then the gaps. **The gaps are the product.** The question that matters
+       is whether the agents found an evidence gap your team did not already know about.
 
-    Use natural language to query the enforcement case database:
+    ---
 
-    1. Navigate to **Case Analytics** in the sidebar
-    2. Type a question like *"What are the precedents for wildfire penalties?"*
-    3. Select an analysis type (precedent, trend, risk, or summary)
-    4. Review AI-generated analysis with relevant cases, risk assessment, and recommendations
+    ### Step 5: Ask questions in Case Analytics
+    Natural-language queries over enforcement history — precedent, trend, risk or summary analysis.
     """)
 
 with tab_workflows:
-    st.markdown("### Module Workflow Details")
-    st.markdown("")
-
     wf1, wf2 = st.columns(2)
     with wf1:
         st.markdown("""
         #### 1. Regulatory Change Monitor
-        **Type:** Agentic AI (5-node pipeline)
+        **Agentic — 5-node pipeline**
 
         | Step | Agent Action |
         |------|-------------|
-        | Fetch | Scans 7 regulatory sources |
-        | Classify | AI determines change type & severity |
-        | Extract | Pulls specific obligations from text |
-        | Map | Assigns to Company departments |
-        | Alert | Generates prioritized notifications |
-
-        **Best for:** Staying current with regulatory changes,
-        identifying new compliance obligations early.
+        | Fetch | Load regulatory sources |
+        | Classify | Determine change type & severity |
+        | Extract | Pull obligations **+ verify source quote** |
+        | Map | Assign to departments |
+        | Alert | Prioritise by severity |
 
         ---
 
         #### 3. Audit Analysis & Preparation
-        **Type:** Agentic AI (Supervisor + 3 Sub-Agents)
+        **Agentic — Supervisor + 3 specialists**
 
         | Agent | Role |
         |-------|------|
-        | Supervisor | Plans approach, reviews final package |
-        | Evidence Collector | Finds and validates documentation |
-        | Gap Analyzer | Identifies compliance gaps |
-        | Response Drafter | Writes audit-ready responses |
-
-        **Best for:** Preparing for regulatory audits,
-        identifying evidence gaps before auditors arrive.
+        | Supervisor | Plans the approach; reviews the package against its own plan |
+        | Evidence Collector | Maps evidence; rates relevance & sufficiency |
+        | Gap Analyzer | Finds gaps; assigns owner, effort, deadline |
+        | Response Drafter | Drafts responses with citations |
         """)
-
     with wf2:
         st.markdown("""
         #### 2. Obligation Impact Analysis
-        **Type:** Agentic AI (4-node graph)
+        **Agentic — 4-node graph**
 
         | Step | Agent Action |
         |------|-------------|
-        | Decompose | Breaks regulation into atomic obligations |
-        | Cross-Ref | Checks conflicts with existing rules |
-        | Score | Rates cost, operations, timeline, penalty |
-        | Report | Generates executive summary |
-
-        **Best for:** Understanding the full impact of a new
-        regulation before planning compliance response.
+        | Decompose | Break into atomic obligations |
+        | Cross-Ref | Find conflicts with existing estate |
+        | Score | Cost, operations, timeline, penalty |
+        | Report | Executive summary + actions |
 
         ---
 
         #### 4. Case Analytics
-        **Type:** Generative AI (RAG + Search)
+        **Generative AI — RAG**
 
         | Feature | Description |
         |---------|-------------|
-        | Dashboard | Interactive penalty charts & trends |
-        | AI Search | Natural language case queries |
-        | Browser | Filter & explore 28 cases |
+        | Dashboard | Penalty charts & trends |
+        | AI Search | Natural-language case queries |
+        | Browser | Filter and explore cases |
         | Analysis | Precedent, trend, risk, summary |
-
-        **Best for:** Understanding enforcement history,
-        finding precedents, assessing penalty exposure.
         """)
 
 with tab_arch:
-    st.markdown("### Platform Architecture")
     st.code("""
-┌──────────────────────── STREAMLIT CLOUD UI ────────────────────────────┐
-│  Regulatory Monitor │ Obligation Impact │ Audit Prep │ Case Analytics  │
+┌──────────────────────── STREAMLIT UI ─────────────────────────────────┐
+│  Regulatory Monitor │ Obligation Impact │ Audit Prep │ Case Analytics │
 └──────────┬──────────┴────────┬──────────┴─────┬──────┴────────┬───────┘
            │                   │                │               │
 ┌──────────▼───────────────────▼────────────────▼───────────────▼───────┐
 │                    LangGraph Agent Orchestrator                        │
-│  ┌─────────────┐  ┌──────────────┐  ┌──────────────┐  ┌───────────┐  │
-│  │  5-Node     │  │  4-Node      │  │  Supervisor  │  │  RAG      │  │
-│  │  Pipeline   │  │  Impact      │  │  + 3 Agents  │  │  Chain    │  │
-│  └─────────────┘  └──────────────┘  └──────────────┘  └───────────┘  │
+│  ┌─────────────┐  ┌──────────────┐  ┌──────────────┐  ┌───────────┐   │
+│  │  5-Node     │  │  4-Node      │  │  Supervisor  │  │  RAG      │   │
+│  │  Pipeline   │  │  Impact      │  │  + 3 Agents  │  │  Chain    │   │
+│  └─────────────┘  └──────────────┘  └──────────────┘  └───────────┘   │
 └──────────────────────────────┬────────────────────────────────────────┘
                                │
 ┌──────────────────────────────▼────────────────────────────────────────┐
-│   OpenAI GPT-4o    │   Claude (Fallback)  │  TF-IDF Search  │ SQLite │
+│              INDUSTRY DOMAIN PACK  (core/domains.py)                   │
+│   Energy & Utilities  │  Retail  │  Resources  │  Services            │
+│   regulators · departments · obligation register · profile · corpora   │
+└──────────────────────────────┬────────────────────────────────────────┘
+                               │
+┌──────────────────────────────▼────────────────────────────────────────┐
+│   OpenAI GPT-4o   │  Claude (failover)  │  TF-IDF Retrieval │ SQLite  │
 └───────────────────────────────────────────────────────────────────────┘
     """, language=None)
+    st.markdown("""
+    **The design point**: the orchestration layer knows nothing about wildfires, or PCI DSS, or methane.
+    It knows about *regulations*, *obligations*, *evidence* and *gaps*. The industry lives in the pack.
+    """)
 
-    st.markdown("### Technology Stack")
+with tab_trust:
+    st.markdown("""
+    ### What this platform will and will not do
 
-    tc1, tc2, tc3, tc4 = st.columns(4)
-    with tc1:
-        st.markdown("""
-        **AI / LLM**
-        - OpenAI GPT-4o (primary)
-        - Claude Sonnet (fallback)
-        - LangGraph orchestration
-        """)
-    with tc2:
-        st.markdown("""
-        **Data**
-        - In-Memory TF-IDF search
-        - SQLite structured store
-        - 28 enforcement cases
-        """)
-    with tc3:
-        st.markdown("""
-        **Regulatory**
-        - 12 active regulations
-        - 7 regulatory bodies
-        - 45+ evidence documents
-        """)
-    with tc4:
-        st.markdown("""
-        **Application**
-        - Streamlit Cloud
-        - Plotly visualizations
-        - Python 3.11+
-        """)
+    Compliance is a domain where a confident wrong answer is worse than no answer. So:
+
+    **Provenance is enforced, not requested.** Every extracted obligation must carry a verbatim quote from
+    the source. The platform then checks that the quote *actually appears* in the source text. If it does
+    not, the obligation is flagged `⚠ Quote not found` and its confidence is downgraded — it is never
+    presented as equivalent to a verified one.
+
+    **Human review is a gate, not a suggestion.** Output is decision support. The audit package is stamped
+    `PENDING_HUMAN_REVIEW`. Nothing here is a compliance determination, and nothing goes to a regulator
+    without qualified sign-off.
+
+    **The agents are told not to guess.** Where the source text does not state a deadline or a penalty, the
+    agents are instructed to write "not stated in source" rather than estimate. An invented deadline in a
+    compliance register is a material harm, not a rounding error.
+
+    ### Known limitations of this prototype
+
+    - **No live ingestion.** Regulations are fixture data, not scraped from regulators. Production requires
+      real connectors with change detection.
+    - **Retrieval is TF-IDF**, not embeddings. A real vector store and legal-domain embeddings are the
+      production path (the seam already exists in `core/embeddings.py`).
+    - **Nothing persists.** Runs are ephemeral; the SQLite schema exists but the obligation lifecycle is
+      not yet wired to it.
+    - **No access-scoped retrieval.** In production, an agent must only see evidence the requesting user is
+      entitled to see.
+    """)
+    render_data_provenance()

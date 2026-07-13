@@ -10,17 +10,15 @@ import os
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-if "OPENAI_API_KEY" in st.secrets:
-    os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
-if "ANTHROPIC_API_KEY" in st.secrets:
-    os.environ["ANTHROPIC_API_KEY"] = st.secrets["ANTHROPIC_API_KEY"]
 
 st.set_page_config(page_title="Obligation Impact | Regulatory Compliance AI", page_icon="📊", layout="wide")
 
 from core.styles import (inject_styles, render_page_header, render_kpi_row,
                           render_section, render_pipeline, render_empty_state, severity_badge)
+from core.ui import bootstrap, require_llm, render_review_gate
 
 inject_styles()
+pack = bootstrap()
 
 render_page_header(
     title="Obligation Impact Analysis",
@@ -33,18 +31,18 @@ render_pipeline(["Decompose Obligations", "Cross-Reference", "Score Impact", "Ex
 # --- Input ---
 render_section("Select Regulation to Analyze")
 
-from agents.regulatory_monitor.tools import SAMPLE_REGULATORY_UPDATES
+REGULATIONS = pack["regulations"]
 
 selected_reg = st.selectbox(
     "Regulation",
-    options=[f"[{u['source']}] {u['title']}" for u in SAMPLE_REGULATORY_UPDATES],
+    options=[f"[{u['source']}] {u['title']}" for u in REGULATIONS],
     index=0,
-    label_visibility="collapsed"
+    label_visibility="collapsed",
 )
 
-selected_idx = next(i for i, u in enumerate(SAMPLE_REGULATORY_UPDATES)
+selected_idx = next(i for i, u in enumerate(REGULATIONS)
                     if f"[{u['source']}] {u['title']}" == selected_reg)
-selected_data = SAMPLE_REGULATORY_UPDATES[selected_idx]
+selected_data = REGULATIONS[selected_idx]
 
 with st.expander("View Full Regulation Text", expanded=False):
     st.text(selected_data["text"])
@@ -56,10 +54,7 @@ with col2:
 st.markdown("---")
 
 if analyze_button:
-    api_key = os.getenv("OPENAI_API_KEY", "")
-    if not api_key:
-        st.error("OPENAI_API_KEY not set. Please configure in Streamlit Cloud Secrets.")
-        st.stop()
+    require_llm()
 
     from agents.obligation_impact.graph import run_obligation_impact
 
@@ -77,6 +72,8 @@ if analyze_button:
     report = result.get("report", {})
     obligations = result.get("atomic_obligations", [])
     scores = result.get("impact_scores", [])
+
+    render_review_gate()
 
     # --- Executive Report ---
     if report:

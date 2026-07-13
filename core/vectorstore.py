@@ -10,10 +10,10 @@ import math
 from collections import Counter
 
 # Collection names
-COLLECTION_REGULATIONS = "pwe_regulations"
-COLLECTION_OBLIGATIONS = "pwe_obligations"
-COLLECTION_CASES = "pwe_cases"
-COLLECTION_AUDIT = "pwe_audit_evidence"
+COLLECTION_REGULATIONS = "pge_regulations"
+COLLECTION_OBLIGATIONS = "pge_obligations"
+COLLECTION_CASES = "pge_cases"
+COLLECTION_AUDIT = "pge_audit_evidence"
 
 # --- In-memory vector store (Streamlit Cloud compatible) ---
 # Stores documents as plain text with TF-IDF-based similarity search.
