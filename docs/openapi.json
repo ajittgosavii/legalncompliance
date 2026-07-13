@@ -1,0 +1,1302 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Regulatory Compliance AI",
+    "description": "Seven agents turn dense regulation into testable obligations \u2014 each with a citation verified in CODE against the source text \u2014 score their impact, and assemble audit-ready evidence packages. A human always signs off; this API determines nothing.",
+    "version": "0.2.0"
+  },
+  "paths": {
+    "/api/domains": {
+      "get": {
+        "tags": [
+          "domains"
+        ],
+        "summary": "List Domains",
+        "description": "All industry packs. Switching the pack re-targets all 7 agents \u2014 no agent code changes.",
+        "operationId": "list_domains_api_domains_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DomainSummary"
+                  },
+                  "type": "array",
+                  "title": "Response List Domains Api Domains Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/domains/{domain}/regulations": {
+      "get": {
+        "tags": [
+          "domains"
+        ],
+        "summary": "List Regulations",
+        "operationId": "list_regulations_api_domains__domain__regulations_get",
+        "parameters": [
+          {
+            "name": "domain",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Domain"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RegulationSummary"
+                  },
+                  "title": "Response List Regulations Api Domains  Domain  Regulations Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/domains/{domain}/audit-types": {
+      "get": {
+        "tags": [
+          "domains"
+        ],
+        "summary": "List Audit Types",
+        "description": "Audit type -> the obligations that audit tests. Drives the Audit Prep screen.",
+        "operationId": "list_audit_types_api_domains__domain__audit_types_get",
+        "parameters": [
+          {
+            "name": "domain",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Domain"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  },
+                  "title": "Response List Audit Types Api Domains  Domain  Audit Types Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/domains/{domain}/cases": {
+      "get": {
+        "tags": [
+          "domains"
+        ],
+        "summary": "List Cases",
+        "operationId": "list_cases_api_domains__domain__cases_get",
+        "parameters": [
+          {
+            "name": "domain",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Domain"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  "title": "Response List Cases Api Domains  Domain  Cases Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/monitor/run": {
+      "post": {
+        "tags": [
+          "WF-01 Regulatory Monitor"
+        ],
+        "summary": "Run Monitor",
+        "description": "Fetch \u2192 Classify \u2192 Extract (+VERIFY CITATION) \u2192 Map to departments \u2192 Alert.\n\n\u26a0\ufe0f COST + LATENCY: this is `2N + 1` LLM calls for N regulations. For the full Energy pack that\nis 23 calls and takes minutes. **In production this MUST be a background job** with polling or\nSSE \u2014 a blocking POST will time out behind any real gateway. It is synchronous here so the\ncontract is legible; do not ship it this way.",
+        "operationId": "run_monitor_api_monitor_run_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/impact/run": {
+      "post": {
+        "tags": [
+          "WF-02 Obligation Impact"
+        ],
+        "summary": "Run Impact",
+        "description": "Decompose \u2192 Cross-reference \u2192 Score (cost/ops/timeline/penalty) \u2192 Executive report.\n\nExactly 4 LLM calls. Predictable and cheap.",
+        "operationId": "run_impact_api_impact_run_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImpactRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImpactResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/audit/run": {
+      "post": {
+        "tags": [
+          "WF-03 Audit Prep (FLAGSHIP)"
+        ],
+        "summary": "Run Audit",
+        "description": "Supervisor plans \u2192 Evidence Collector \u2192 Gap Analyzer \u2192 Response Drafter \u2192 Supervisor reviews.\n\nProduces the traceable chain a regulator asks for when it says \"show me\":\n\n    regulation \u2192 obligation \u2192 evidence doc \u2192 gap \u2192 owner + date \u2192 drafted response\n\nterminating in a 0\u2013100 readiness score. 5 LLM calls.",
+        "operationId": "run_audit_api_audit_run_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuditRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cases/analyze": {
+      "post": {
+        "tags": [
+          "WF-04 Case Analytics"
+        ],
+        "summary": "Analyze Cases",
+        "description": "RAG over the enforcement corpus. 1 LLM call.",
+        "operationId": "analyze_cases_api_cases_analyze_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CaseRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Analyze Cases Api Cases Analyze Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cases/stats": {
+      "get": {
+        "tags": [
+          "WF-04 Case Analytics"
+        ],
+        "summary": "Case Stats",
+        "description": "Aggregate stats + penalty timeline. NO LLM CALL \u2014 the dashboard renders free.",
+        "operationId": "case_stats_api_cases_stats_get",
+        "parameters": [
+          {
+            "name": "domain",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "energy_utilities",
+              "title": "Domain"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Case Stats Api Cases Stats Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/health": {
+      "get": {
+        "tags": [
+          "ops"
+        ],
+        "summary": "Health",
+        "operationId": "health_api_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Health Api Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Alert": {
+        "properties": {
+          "alert_id": {
+            "type": "string",
+            "title": "Alert Id"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "severity": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "critical",
+                  "high",
+                  "medium",
+                  "low"
+                ]
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Severity"
+          },
+          "change_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Change Type"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Summary"
+          },
+          "key_deadlines": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Key Deadlines",
+            "default": []
+          },
+          "penalty_info": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Penalty Info"
+          },
+          "obligation_count": {
+            "type": "integer",
+            "title": "Obligation Count",
+            "default": 0
+          },
+          "obligations": {
+            "items": {
+              "$ref": "#/components/schemas/Obligation"
+            },
+            "type": "array",
+            "title": "Obligations",
+            "default": []
+          },
+          "affected_departments": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Affected Departments",
+            "default": []
+          },
+          "impact_mappings": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Impact Mappings",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "alert_id",
+          "source",
+          "title",
+          "severity"
+        ],
+        "title": "Alert"
+      },
+      "AuditRequest": {
+        "properties": {
+          "domain": {
+            "type": "string",
+            "title": "Domain",
+            "default": "energy_utilities"
+          },
+          "audit_scope": {
+            "type": "string",
+            "title": "Audit Scope",
+            "description": "An audit type from GET .../audit-types"
+          },
+          "regulations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Regulations",
+            "description": "Regulations in scope"
+          }
+        },
+        "type": "object",
+        "required": [
+          "audit_scope"
+        ],
+        "title": "AuditRequest"
+      },
+      "AuditResponse": {
+        "properties": {
+          "review_status": {
+            "type": "string",
+            "const": "PENDING_HUMAN_REVIEW",
+            "title": "Review Status",
+            "default": "PENDING_HUMAN_REVIEW"
+          },
+          "disclaimer": {
+            "type": "string",
+            "title": "Disclaimer",
+            "default": "AI-generated decision support. Not a compliance determination. Every obligation, gap and drafted response requires review and sign-off by qualified personnel before use, and no content may be submitted to a regulator without that sign-off."
+          },
+          "audit_plan": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Audit Plan"
+          },
+          "evidence_inventory": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Evidence Inventory"
+          },
+          "gap_analysis": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Gap Analysis",
+            "description": "THE PRODUCT. Each gap: severity, audit_risk, remediation{action,owner,effort,deadline}, interim_mitigation"
+          },
+          "draft_responses": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Draft Responses"
+          },
+          "supervisor_review": {
+            "$ref": "#/components/schemas/SupervisorReview"
+          }
+        },
+        "type": "object",
+        "required": [
+          "audit_plan",
+          "evidence_inventory",
+          "gap_analysis",
+          "draft_responses",
+          "supervisor_review"
+        ],
+        "title": "AuditResponse"
+      },
+      "CaseRequest": {
+        "properties": {
+          "domain": {
+            "type": "string",
+            "title": "Domain",
+            "default": "energy_utilities"
+          },
+          "query": {
+            "type": "string",
+            "title": "Query"
+          },
+          "analysis_type": {
+            "type": "string",
+            "enum": [
+              "precedent",
+              "trend",
+              "risk",
+              "summary"
+            ],
+            "title": "Analysis Type",
+            "default": "precedent"
+          }
+        },
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "title": "CaseRequest"
+      },
+      "DomainSummary": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "vertical": {
+            "type": "string",
+            "title": "Vertical"
+          },
+          "company": {
+            "type": "string",
+            "title": "Company"
+          },
+          "company_full": {
+            "type": "string",
+            "title": "Company Full"
+          },
+          "financial_hook": {
+            "type": "string",
+            "title": "Financial Hook"
+          },
+          "regulators": {
+            "items": {
+              "$ref": "#/components/schemas/Regulator"
+            },
+            "type": "array",
+            "title": "Regulators"
+          },
+          "departments": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Departments"
+          },
+          "categories": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Categories"
+          },
+          "regulation_count": {
+            "type": "integer",
+            "title": "Regulation Count"
+          },
+          "case_count": {
+            "type": "integer",
+            "title": "Case Count"
+          },
+          "evidence_count": {
+            "type": "integer",
+            "title": "Evidence Count"
+          },
+          "audit_types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Audit Types"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "label",
+          "vertical",
+          "company",
+          "company_full",
+          "financial_hook",
+          "regulators",
+          "departments",
+          "categories",
+          "regulation_count",
+          "case_count",
+          "evidence_count",
+          "audit_types"
+        ],
+        "title": "DomainSummary"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "ImpactRequest": {
+        "properties": {
+          "domain": {
+            "type": "string",
+            "title": "Domain",
+            "default": "energy_utilities"
+          },
+          "regulation_index": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Regulation Index",
+            "description": "Index into GET /api/domains/{domain}/regulations"
+          },
+          "regulation_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Regulation Text",
+            "description": "Or paste raw regulatory text"
+          },
+          "regulation_source": {
+            "type": "string",
+            "title": "Regulation Source",
+            "default": "Unknown"
+          }
+        },
+        "type": "object",
+        "title": "ImpactRequest"
+      },
+      "ImpactResponse": {
+        "properties": {
+          "review_status": {
+            "type": "string",
+            "const": "PENDING_HUMAN_REVIEW",
+            "title": "Review Status",
+            "default": "PENDING_HUMAN_REVIEW"
+          },
+          "disclaimer": {
+            "type": "string",
+            "title": "Disclaimer",
+            "default": "AI-generated decision support. Not a compliance determination. Every obligation, gap and drafted response requires review and sign-off by qualified personnel before use, and no content may be submitted to a regulator without that sign-off."
+          },
+          "atomic_obligations": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Atomic Obligations"
+          },
+          "cross_references": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Cross References"
+          },
+          "impact_scores": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Impact Scores"
+          },
+          "report": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Report",
+            "description": "executive_summary, cost range, earliest_deadline, key_risks, recommended_actions[], board_attention_items[], regulatory_strategy"
+          }
+        },
+        "type": "object",
+        "required": [
+          "atomic_obligations",
+          "cross_references",
+          "impact_scores",
+          "report"
+        ],
+        "title": "ImpactResponse"
+      },
+      "MonitorRequest": {
+        "properties": {
+          "domain": {
+            "type": "string",
+            "title": "Domain",
+            "default": "energy_utilities"
+          },
+          "source_filter": {
+            "type": "string",
+            "title": "Source Filter",
+            "description": "Regulator code (e.g. 'OEIS', 'CPUC') or 'all'",
+            "default": "all"
+          }
+        },
+        "type": "object",
+        "title": "MonitorRequest"
+      },
+      "MonitorResponse": {
+        "properties": {
+          "review_status": {
+            "type": "string",
+            "const": "PENDING_HUMAN_REVIEW",
+            "title": "Review Status",
+            "default": "PENDING_HUMAN_REVIEW"
+          },
+          "disclaimer": {
+            "type": "string",
+            "title": "Disclaimer",
+            "default": "AI-generated decision support. Not a compliance determination. Every obligation, gap and drafted response requires review and sign-off by qualified personnel before use, and no content may be submitted to a regulator without that sign-off."
+          },
+          "alerts": {
+            "items": {
+              "$ref": "#/components/schemas/Alert"
+            },
+            "type": "array",
+            "title": "Alerts"
+          },
+          "obligations": {
+            "items": {
+              "$ref": "#/components/schemas/Obligation"
+            },
+            "type": "array",
+            "title": "Obligations"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/Provenance"
+          },
+          "regulations_scanned": {
+            "type": "integer",
+            "title": "Regulations Scanned"
+          }
+        },
+        "type": "object",
+        "required": [
+          "alerts",
+          "obligations",
+          "provenance",
+          "regulations_scanned"
+        ],
+        "title": "MonitorResponse"
+      },
+      "Obligation": {
+        "properties": {
+          "obligation_id": {
+            "type": "string",
+            "title": "Obligation Id"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "responsible_entity": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Responsible Entity"
+          },
+          "deadline": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deadline",
+            "description": "or the literal string 'not stated in source'"
+          },
+          "measurement": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Measurement"
+          },
+          "penalty": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Penalty"
+          },
+          "category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category"
+          },
+          "source_regulation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Regulation"
+          },
+          "source_body": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Body"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          },
+          "severity": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Severity"
+          },
+          "source_quote": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Quote",
+            "description": "VERBATIM span copied from the regulation"
+          },
+          "source_section": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Section"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "high",
+                  "medium",
+                  "low"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "inferred": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inferred"
+          },
+          "citation_verified": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Citation Verified",
+            "description": "TRUE only if the quote was FOUND in the source text by core provenance verification. FALSE means the model may have paraphrased or fabricated it. The UI must show these with a warning badge and MUST NOT present them as equivalent to verified obligations."
+          }
+        },
+        "type": "object",
+        "required": [
+          "obligation_id",
+          "description"
+        ],
+        "title": "Obligation"
+      },
+      "Provenance": {
+        "properties": {
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "verified": {
+            "type": "integer",
+            "title": "Verified"
+          },
+          "unverified": {
+            "type": "integer",
+            "title": "Unverified"
+          },
+          "verified_pct": {
+            "type": "integer",
+            "title": "Verified Pct"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total",
+          "verified",
+          "unverified",
+          "verified_pct"
+        ],
+        "title": "Provenance",
+        "description": "Citation health for a run. The React UI MUST surface this \u2014 it is the trust story."
+      },
+      "RegulationSummary": {
+        "properties": {
+          "index": {
+            "type": "integer",
+            "title": "Index"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "published_date": {
+            "type": "string",
+            "title": "Published Date"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "index",
+          "source",
+          "title",
+          "published_date",
+          "text"
+        ],
+        "title": "RegulationSummary"
+      },
+      "Regulator": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "scope": {
+            "type": "string",
+            "title": "Scope"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "name",
+          "scope"
+        ],
+        "title": "Regulator"
+      },
+      "SupervisorReview": {
+        "properties": {
+          "overall_readiness": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Overall Readiness"
+          },
+          "readiness_score": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Readiness Score",
+            "description": "0-100. The headline number."
+          },
+          "executive_summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Executive Summary"
+          },
+          "critical_items": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Critical Items",
+            "default": []
+          },
+          "strengths": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Strengths",
+            "default": []
+          },
+          "weaknesses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Weaknesses",
+            "default": []
+          },
+          "recommendations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Recommendations",
+            "default": []
+          },
+          "timeline_assessment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timeline Assessment"
+          }
+        },
+        "type": "object",
+        "title": "SupervisorReview"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
